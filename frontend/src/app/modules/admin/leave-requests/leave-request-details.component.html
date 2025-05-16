@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>Leave Request Details</h2>
+<mat-dialog-content>
+  <div class="details-grid">
+    <div class="detail-row">
+      <div class="label">Employee Name:</div>
+      <div class="value">{{ request.employeeName }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Employee ID:</div>
+      <div class="value">{{ request.employeeId }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Department:</div>
+      <div class="value">{{ request.department }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Leave Type:</div>
+      <div class="value">{{ request.leaveType }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Start Date:</div>
+      <div class="value">{{ request.startDate | date:'mediumDate' }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">End Date:</div>
+      <div class="value">{{ request.endDate | date:'mediumDate' }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Reason:</div>
+      <div class="value">{{ request.reason }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Status:</div>
+      <div class="value" [ngClass]="{'pending': request.status === 'pending',
+                                    'approved': request.status === 'approved',
+                                    'rejected': request.status === 'rejected'}">
+        {{ request.status | titlecase }}
+      </div>
+    </div>
+    <div class="detail-row" *ngIf="request.status === 'rejected'">
+      <div class="label">Rejection Reason:</div>
+      <div class="value">{{ request.rejectionReason }}</div>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="close()">Close</button>
+</mat-dialog-actions>

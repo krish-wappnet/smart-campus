@@ -1,0 +1,163 @@
+.leave-requests-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h2 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2em;
+  }
+
+  .leave-form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+
+    h3 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+        font-weight: 500;
+      }
+
+      select, input, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1em;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: #4CAF50;
+        }
+      }
+
+      textarea {
+        height: 100px;
+        resize: vertical;
+      }
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      width: 100%;
+      transition: background 0.3s ease;
+
+      &:hover:not(:disabled) {
+        background: #45a049;
+      }
+
+      &:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .leave-history {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    h3 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+
+    .requests-list {
+      .request-item {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .request-info {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+
+          .request-type {
+            font-weight: 500;
+            color: #333;
+          }
+
+          .request-dates {
+            color: #666;
+          }
+
+          .request-status {
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-size: 0.9em;
+          }
+        }
+
+        .request-reason {
+          color: #333;
+          white-space: pre-wrap;
+        }
+
+        .request-actions {
+          display: flex;
+          gap: 10px;
+
+          .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+
+            &.approve {
+              background: #4CAF50;
+              color: white;
+
+              &:hover {
+                background: #45a049;
+              }
+            }
+
+            &.reject {
+              background: #f44336;
+              color: white;
+
+              &:hover {
+                background: #da190b;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

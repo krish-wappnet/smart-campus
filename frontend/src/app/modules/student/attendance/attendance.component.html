@@ -1,0 +1,70 @@
+<div class="attendance-container">
+  <h2>Attendance</h2>
+
+  <div class="class-selector">
+    <div class="current-class" *ngIf="selectedClass">
+      <h3>{{ selectedClass.subject }}</h3>
+      <p>{{ selectedClass.batch }}</p>
+      <p>{{ selectedClass.room }}</p>
+      <button (click)="selectedClass = null">Change Class</button>
+    </div>
+
+    <div class="class-list" *ngIf="!selectedClass">
+      <div *ngFor="let class of classes$ | async" class="class-item" (click)="selectClass(class)">
+        <h3>{{ class.subject }}</h3>
+        <p>{{ class.batch }}</p>
+        <p>{{ class.room }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="attendance-content" *ngIf="selectedClass">
+    <div class="attendance-stats">
+      <div class="stat-card">
+        <h3>Attendance Statistics</h3>
+        <div class="stat-row">
+          <span class="label">Total Classes:</span>
+          <span class="value">{{ attendanceStats.total }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Present:</span>
+          <span class="value">{{ attendanceStats.present }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Absent:</span>
+          <span class="value">{{ attendanceStats.absent }}</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Percentage:</span>
+          <span class="value">{{ attendanceStats.percentage }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="attendance-actions">
+      <button 
+        class="attendance-btn present" 
+        (click)="markAttendance('present')">
+        Mark Present
+      </button>
+      <button 
+        class="attendance-btn absent" 
+        (click)="markAttendance('absent')">
+        Mark Absent
+      </button>
+    </div>
+
+    <div class="attendance-history">
+      <h3>Attendance History</h3>
+      <div class="history-list">
+        <div *ngFor="let record of attendanceHistory$ | async" class="history-item">
+          <div class="history-date">{{ record.date }}</div>
+          <div class="history-class">{{ record.class }}</div>
+          <div class="history-status" [class.present]="record.status === 'present'">
+            {{ record.status }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

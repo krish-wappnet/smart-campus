@@ -1,0 +1,65 @@
+<div class="schedule-container">
+  <h2>My Schedule</h2>
+
+  <div class="schedule-grid">
+    <div class="day-header">
+      <div class="time-slot">Time</div>
+      <div class="day-cell" *ngFor="let day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']">
+        {{ day }}
+      </div>
+    </div>
+
+    <div *ngFor="let time of getTimeSlots()" class="time-row">
+      <div class="time-slot">{{ time }}</div>
+      
+      <div class="day-cell" *ngFor="let day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']">
+        <div *ngFor="let class of (schedule$ | async)" class="class-slot">
+          <div *ngIf="class.day === day && class.startTime === time">
+            <div class="class-info" [class.editing]="isEditingClass(class)">
+              <div class="subject">
+                <input 
+                  *ngIf="isEditingClass(class)" 
+                  type="text" 
+                  [ngModel]="editedClass?.subject"
+                  (ngModelChange)="editedClass && (editedClass.subject = $event)"
+                  (blur)="saveClassChanges()"
+                  (keyup.enter)="saveClassChanges()"
+                >
+                <span *ngIf="!isEditingClass(class)">{{ class.subject }}</span>
+              </div>
+              <div class="teacher">
+                <input 
+                  *ngIf="isEditingClass(class)" 
+                  type="text" 
+                  [ngModel]="editedClass?.teacherName"
+                  (ngModelChange)="editedClass && (editedClass.teacherName = $event)"
+                  (blur)="saveClassChanges()"
+                  (keyup.enter)="saveClassChanges()"
+                >
+                <span *ngIf="!isEditingClass(class)">{{ class.teacherName }}</span>
+              </div>
+              <div class="room">
+                <input 
+                  *ngIf="isEditingClass(class)" 
+                  type="text" 
+                  [ngModel]="editedClass?.room"
+                  (ngModelChange)="editedClass && (editedClass.room = $event)"
+                  (blur)="saveClassChanges()"
+                  (keyup.enter)="saveClassChanges()"
+                >
+                <span *ngIf="!isEditingClass(class)">{{ class.room }}</span>
+              </div>
+              <div class="actions" *ngIf="!isEditingClass(class)">
+                <button (click)="editClass(class)">Edit</button>
+              </div>
+              <div class="actions" *ngIf="isEditingClass(class)">
+                <button (click)="saveClassChanges()">Save</button>
+                <button (click)="cancelEdit()">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
