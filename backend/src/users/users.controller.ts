@@ -37,7 +37,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.FACULTY)
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Return all users', type: [UserResponseDto] })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

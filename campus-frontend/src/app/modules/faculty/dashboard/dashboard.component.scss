@@ -1,0 +1,161 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 24px;
+  background: #f8f9fa;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+
+    .welcome-card {
+      grid-column: span 3;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+      mat-card-title {
+        color: #333;
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+
+      mat-card-content {
+        color: #666;
+        font-size: 16px;
+      }
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease-in-out;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      mat-card-title {
+        color: #333;
+        font-size: 16px;
+        margin-bottom: 16px;
+      }
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #2196f3;
+        margin: 16px 0;
+      }
+
+      mat-icon {
+        font-size: 48px;
+        color: #2196f3;
+      }
+    }
+
+    .content-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      mat-card-title {
+        padding: 24px;
+        border-bottom: 1px solid #eee;
+        color: #333;
+        font-size: 18px;
+      }
+
+      mat-card-content {
+        padding: 24px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        .attendance-filters {
+          display: flex;
+          gap: 16px;
+          margin-bottom: 24px;
+          padding: 0 24px;
+
+          mat-form-field {
+            flex: 1;
+            margin: 0;
+          }
+        }
+
+        .attendance-status {
+          .present {
+            color: #4caf50;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(76, 175, 80, 0.1);
+          }
+
+          .absent {
+            color: #f44336;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(244, 67, 54, 0.1);
+          }
+        }
+
+        .no-data {
+          text-align: center;
+          padding: 24px;
+          color: #666;
+          font-size: 14px;
+        }
+
+        mat-list {
+          flex: 1;
+          overflow-y: auto;
+        }
+
+        mat-list-item {
+          padding: 16px;
+          border-bottom: 1px solid #eee;
+
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .grid-container {
+      grid-template-columns: repeat(2, 1fr);
+      
+      .welcome-card {
+        grid-column: span 2;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .grid-container {
+      grid-template-columns: 1fr;
+      
+      .welcome-card {
+        grid-column: span 1;
+      }
+    }
+  }
+}

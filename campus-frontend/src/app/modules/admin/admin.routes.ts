@@ -11,7 +11,8 @@ export const routes: Routes = [
       { path: 'users', loadComponent: () => import('./users/manage-users/manage-users.component').then(m => m.ManageUsersComponent) },
       { path: 'rooms', loadComponent: () => import('./rooms/manage-rooms/manage-rooms.component').then(m => m.ManageRoomsComponent) },
       { path: 'timeslots', loadComponent: () => import('./timeslots/manage-timeslots/manage-timeslots.component').then(m => m.ManageTimeslotsComponent) },
-      { path: 'classes', loadComponent: () => import('./classes/manage-classes/manage-classes.component').then(m => m.ManageClassesComponent) }
+      { path: 'classes', loadComponent: () => import('./classes/manage-classes/manage-classes.component').then(m => m.ManageClassesComponent) },
+      { path: 'leave-requests', loadComponent: () => import('./leave-requests/manage-leave-requests/manage-leave-requests.component').then(m => m.ManageLeaveRequestsComponent) }
     ]
   }
 ];

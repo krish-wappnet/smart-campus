@@ -70,12 +70,26 @@ export class ApiService {
     );
   }
 
-  getAttendance(): Observable<any[]> {
+  getClassAttendance(classId: string, date: string): Observable<any> {
     const token = this.getToken();
     if (!token) {
       return throwError(() => new Error('No authentication token available'));
     }
-    return this.http.get<any[]>(`${this.apiUrl}/attendance`, {
+    return this.http.get<any>(`${this.apiUrl}/attendance/class/${classId}?date=${date}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  getFacultyClasses(): Observable<any[]> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any[]>(`${this.apiUrl}/classes/faculty`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -84,17 +98,77 @@ export class ApiService {
     );
   }
 
-  getLeaveRequests(): Observable<any[]> {
+  startLecture(classId: string): Observable<any> {
     const token = this.getToken();
     if (!token) {
       return throwError(() => new Error('No authentication token available'));
     }
-    return this.http.get<any[]>(`${this.apiUrl}/leave-requests`, {
+    return this.http.post<any>(`${this.apiUrl}/lectures/start`, {
+      classId
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  endLecture(classId: string): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.post<any>(`${this.apiUrl}/lectures/end`, {
+      classId
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  postAttendance(data: any): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.post<any>(`${this.apiUrl}/attendance`, data, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  getLeaveRequestsFaculty(): Observable<any[]> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any[]>(`${this.apiUrl}/leave-requests/faculty`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     }).pipe(
       catchError(error => this.handleError(error, []))
+    );
+  }
+
+  submitLeaveRequest(data: any): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.post<any>(`${this.apiUrl}/leave-requests/faculty`, data, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
     );
   }
 
@@ -160,6 +234,20 @@ export class ApiService {
       return throwError(() => new Error('No authentication token available'));
     }
     return this.http.get<any>(`${this.apiUrl}/rooms`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  markAttendance(attendanceData: any): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.post<any>(`${this.apiUrl}/attendance`, attendanceData, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -239,6 +327,7 @@ export class ApiService {
     );
   }
 
+
   getClasses(): Observable<any> {
     const token = this.getToken();
     if (!token) {
@@ -288,6 +377,163 @@ export class ApiService {
       return throwError(() => new Error('No authentication token available'));
     }
     return this.http.get<any>(`${this.apiUrl}/users/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  // Student methods
+  getStudentProfile(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/student/profile`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  getStudentAttendance(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/attendance/student`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+
+  getAttendanceHistory(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/attendance/history`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  getAnnouncements(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/announcements`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  getStudentActivityLogs(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/activity-logs/student`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, []))
+    );
+  }
+
+  getActivityHeatmap(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/activity-logs/heatmap`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  getActivityCalendar(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/activity-logs/calendar`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  // Leave Requests
+  getLeaveRequests(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/leave-requests`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  createLeaveRequest(leaveRequest: any): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.post<any>(`${this.apiUrl}/leave-requests`, leaveRequest, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  updateLeaveRequest(leaveRequestId: string, leaveRequest: any): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.put<any>(`${this.apiUrl}/leave-requests/${leaveRequestId}`, leaveRequest, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  getStudentClasses(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.get<any>(`${this.apiUrl}/classes/student`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

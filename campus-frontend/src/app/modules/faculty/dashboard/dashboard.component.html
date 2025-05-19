@@ -1,0 +1,102 @@
+<div class="dashboard-container">
+  <div class="grid-container">
+    <!-- Welcome Card -->
+    <mat-card class="welcome-card">
+      <mat-card-title>Welcome, {{ facultyName }}</mat-card-title>
+      <mat-card-content>
+        <p>Your classes and recent activities</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Stats Cards -->
+    <mat-card class="stat-card">
+      <mat-card-title>Total Classes</mat-card-title>
+      <mat-card-content>
+        <div class="stat-value">{{ totalClasses }}</div>
+        <mat-icon>class</mat-icon>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-title>Classes Today</mat-card-title>
+      <mat-card-content>
+        <div class="stat-value">{{ todayClasses.length }}</div>
+        <mat-icon>today</mat-icon>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-title>Pending Leaves</mat-card-title>
+      <mat-card-content>
+        <div class="stat-value">{{ pendingLeaves.length }}</div>
+        <mat-icon>event</mat-icon>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Content Cards -->
+    <mat-card class="content-card">
+      <mat-card-title>Today's Classes</mat-card-title>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let class of todayClasses">
+            <mat-icon matListIcon>schedule</mat-icon>
+            <div matLine>{{ class.startTime }} - {{ class.endTime }}</div>
+            <div matLine>{{ class.name }}</div>
+            <div matLine class="room-info">Room: {{ class.room.name }}</div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="content-card">
+      <mat-card-title>Class Attendance</mat-card-title>
+      <mat-card-content>
+        <div class="attendance-filters">
+          <mat-form-field appearance="outline">
+            <mat-label>Select Class</mat-label>
+            <mat-select [(value)]="selectedClass" (selectionChange)="onClassChange($event)">
+              <mat-option *ngFor="let cls of classes" [value]="cls">
+                {{ cls.name }} ({{ cls.startTime }} - {{ cls.endTime }})
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Select Date</mat-label>
+            <input matInput type="date" [(ngModel)]="selectedDate" (change)="onDateChange($event)">
+          </mat-form-field>
+        </div>
+
+        <div class="attendance-data" *ngIf="attendanceData">
+          <mat-list>
+            <mat-list-item *ngFor="let student of attendanceData.students">
+              <div matLine>{{ student.name }}</div>
+              <div matLine class="attendance-status">
+                <span [class]="student.status === 'present' ? 'present' : 'absent'">
+                  {{ student.status | titlecase }}
+                </span>
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </div>
+
+        <div class="no-data" *ngIf="!attendanceData && selectedClass && selectedDate">
+          <p>No attendance data available for selected class and date</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="content-card">
+      <mat-card-title>Recent Activities</mat-card-title>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let activity of recentActivities">
+            <mat-icon matListIcon>{{ activity.icon }}</mat-icon>
+            <div matLine>{{ activity.description }}</div>
+            <div matLine class="time-info">{{ activity.time }}</div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

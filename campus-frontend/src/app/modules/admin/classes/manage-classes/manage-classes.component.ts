@@ -52,24 +52,24 @@ import { AddClassComponent } from '../add-class/add-class.component';
 
           <ng-container matColumnDef="facultyName">
             <th mat-header-cell *matHeaderCellDef>Faculty Name</th>
-            <td mat-cell *matCellDef="let class">{{ class.facultyName }}</td>
+            <td mat-cell *matCellDef="let class">{{ class.faculty?.name }}</td>
           </ng-container>
 
           <ng-container matColumnDef="facultyEmail">
             <th mat-header-cell *matHeaderCellDef>Faculty Email</th>
-            <td mat-cell *matCellDef="let class">{{ class.facultyEmail }}</td>
+            <td mat-cell *matCellDef="let class">{{ class.faculty?.email }}</td>
           </ng-container>
 
           <ng-container matColumnDef="roomName">
             <th mat-header-cell *matHeaderCellDef>Room</th>
-            <td mat-cell *matClassDef="let class">{{ class.room.name }}</td>
+            <td mat-cell *matCellDef="let class">{{ class.room?.name }}</td>
           </ng-container>
 
           <ng-container matColumnDef="timeslot">
             <th mat-header-cell *matHeaderCellDef>Timeslot</th>
             <td mat-cell *matCellDef="let class">
-              {{ class.timeslot.dayOfWeek.charAt(0).toUpperCase() + class.timeslot.dayOfWeek.slice(1) }} -
-              {{ class.timeslot.startTime }} to {{ class.timeslot.endTime }}
+              {{ class.timeslot?.dayOfWeek.charAt(0).toUpperCase() + class.timeslot?.dayOfWeek.slice(1) }} -
+              {{ class.timeslot?.startTime }} to {{ class.timeslot?.endTime }}
             </td>
           </ng-container>
 
@@ -190,16 +190,7 @@ export class ManageClassesComponent implements OnInit {
     this.loading = true;
     this.api.getClasses().subscribe({
       next: (data: any) => {
-        this.classes = data.map((cls: any) => ({
-          ...cls,
-          // Format timeslot display
-          dayOfWeek: cls.timeslot.dayOfWeek,
-          startTime: cls.timeslot.startTime,
-          endTime: cls.timeslot.endTime,
-          // Format faculty display
-          facultyName: cls.faculty?.name || 'Loading...',
-          facultyEmail: cls.faculty?.email || 'Loading...'
-        }));
+        this.classes = data;
         this.loading = false;
       },
       error: (error: any) => {

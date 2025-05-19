@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { User } from '../store/auth/auth.interface';
 
 @Injectable({
@@ -34,7 +35,7 @@ export class AuthService {
       email,
       password
     }).pipe(
-      map(response => {
+      map((response: { user: User; token: string }) => {
         this.setUser(response.user);
         this.setToken(response.token);
         return response;
