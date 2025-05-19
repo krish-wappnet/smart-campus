@@ -5,7 +5,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-faculty-sidebar',
@@ -17,8 +18,7 @@ import { RouterModule, Router } from '@angular/router';
     MatIconModule,
     MatButtonModule,
     MatListModule,
-    RouterModule,
-    Router
+    RouterModule
   ],
   template: `
     <mat-sidenav #sidenav mode="side" opened>
@@ -134,10 +134,10 @@ import { RouterModule, Router } from '@angular/router';
   `]
 })
 export class FacultySidebarComponent {
-  constructor(private router: Router) {}
+  constructor(private authService: AuthService) {}
 
   logout(): void {
-    localStorage.removeItem('auth_token');
-    this.router.navigate(['/auth/login']);
+    this.authService.logout();
+    window.location.href = '/auth/login';
   }
 }

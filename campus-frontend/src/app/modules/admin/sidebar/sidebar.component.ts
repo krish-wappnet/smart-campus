@@ -8,6 +8,7 @@ import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { selectIsAuthenticated } from '@store/auth/auth.selectors';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -138,13 +139,12 @@ import { selectIsAuthenticated } from '@store/auth/auth.selectors';
   `]
 })
 export class SidebarComponent implements OnInit {
-  constructor(private store: Store) {}
+  constructor(private store: Store, private authService: AuthService) {}
 
   ngOnInit(): void {}
 
   logout(): void {
-    // Implement logout logic here
-    // For now, just navigate to login
-    // this.store.dispatch(authActions.logout());
+    this.authService.logout();
+    window.location.href = '/auth/login';
   }
 }
