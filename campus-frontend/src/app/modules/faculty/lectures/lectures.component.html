@@ -1,0 +1,40 @@
+<div class="lectures-container">
+  <h2>My Lectures</h2>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{error}}
+  </div>
+
+  <div class="classes-grid" *ngIf="!loading && !error">
+    <mat-card class="class-card" *ngFor="let class of classes">
+      <mat-card-header>
+        <mat-card-title>{{class?.name || 'N/A'}}</mat-card-title>
+        <mat-card-subtitle>
+          {{class?.timeslot?.startTime || 'N/A'}} - {{class?.timeslot?.endTime || 'N/A'}}
+          <br>
+          Room: {{class?.room?.name || 'N/A'}} (Capacity: {{class?.room?.capacity || 'N/A'}})
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <span class="faculty">Faculty: {{class?.faculty?.name || 'N/A'}}</span>
+        <p>Day: {{class?.timeslot?.dayOfWeek || 'N/A'}}</p>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="startLecture(class.id)" [disabled]="class.lectureStatus === 'active'">
+          <mat-icon>play_arrow</mat-icon>
+          Start Lecture
+        </button>
+        <button mat-raised-button color="warn" (click)="endLecture(class.id)" [disabled]="class.lectureStatus !== 'active'">
+          <mat-icon>stop</mat-icon>
+          End Lecture
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

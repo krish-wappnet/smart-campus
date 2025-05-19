@@ -5,7 +5,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-faculty-sidebar',
@@ -17,13 +17,13 @@ import { RouterModule } from '@angular/router';
     MatIconModule,
     MatButtonModule,
     MatListModule,
-    RouterModule
+    RouterModule,
+    Router
   ],
   template: `
-    <mat-sidenav-container class="sidenav-container">
-      <mat-sidenav #sidenav mode="side" opened>
+    <mat-sidenav #sidenav mode="side" opened>
         <mat-toolbar color="primary" class="sidenav-header">
-          <span>Smart Campus Faculty</span>
+          <span>Faculty Dashboard</span>
         </mat-toolbar>
         
         <div class="nav-content">
@@ -31,6 +31,11 @@ import { RouterModule } from '@angular/router';
             <a mat-list-item routerLink="/faculty/dashboard" routerLinkActive="active">
               <mat-icon>dashboard</mat-icon>
               <span>Dashboard</span>
+            </a>
+
+            <a mat-list-item routerLink="/faculty/lectures" routerLinkActive="active">
+              <mat-icon>live_tv</mat-icon>
+              <span>My Lectures</span>
             </a>
 
             <a mat-list-item routerLink="/faculty/classes" routerLinkActive="active">
@@ -57,25 +62,13 @@ import { RouterModule } from '@angular/router';
           </button>
         </div>
       </mat-sidenav>
-
-      <mat-sidenav-content>
-        <ng-content></ng-content>
-      </mat-sidenav-content>
-    </mat-sidenav-container>
   `,
   styles: [`
-    .sidenav-container {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
     mat-sidenav {
       width: 250px;
       box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
       height: 100%;
       background-color: white;
-      border-radius: 0 !important;
     }
 
     .sidenav-header {
@@ -85,7 +78,6 @@ import { RouterModule } from '@angular/router';
       padding: 0 16px;
       background-color: #1976d2;
       color: white;
-      border-radius: 0 !important;
     }
 
     .nav-content {
@@ -100,36 +92,40 @@ import { RouterModule } from '@angular/router';
       border-top: 1px solid rgba(0, 0, 0, 0.12);
     }
 
+    mat-nav-list {
+      padding: 16px 0;
+    }
+
     mat-list-item {
-      display: flex;
-      align-items: center;
-      gap: 16px;
       height: 48px;
-      border-radius: 0 !important;
+      min-height: 48px;
+      transition: background-color 0.2s;
+    }
+
+    mat-list-item:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    mat-list-item.active {
+      background-color: rgba(25, 118, 210, 0.1);
     }
 
     mat-icon {
       color: rgba(0, 0, 0, 0.54);
-    }
-
-    .active {
-      background-color: rgba(0, 0, 0, 0.04);
-      border-radius: 0 !important;
-    }
-
-    .mat-mdc-list-item {
-      height: 48px;
-      border-radius: 0 !important;
+      margin-right: 16px;
     }
 
     button {
       width: 100%;
-      text-align: left;
-      border-radius: 0 !important;
+      justify-content: flex-start;
     }
 
-    .mat-mdc-list-item.active {
-      background-color: rgba(0, 0, 0, 0.04);
+    .mat-mdc-list-item-content {
+      padding: 0 16px !important;
+    }
+
+    .mat-mdc-list-item-text {
+      margin-left: 16px !important;
     }
 
     .mat-mdc-button {
@@ -138,8 +134,10 @@ import { RouterModule } from '@angular/router';
   `]
 })
 export class FacultySidebarComponent {
+  constructor(private router: Router) {}
+
   logout(): void {
     localStorage.removeItem('auth_token');
-    window.location.href = '/login';
+    this.router.navigate(['/auth/login']);
   }
 }

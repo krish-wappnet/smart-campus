@@ -25,45 +25,49 @@ import { selectIsAuthenticated } from '@store/auth/auth.selectors';
     <mat-sidenav-container class="sidenav-container">
       <mat-sidenav #sidenav mode="side" opened>
         <mat-toolbar color="primary" class="sidenav-header">
-          <span>Smart Campus Admin</span>
+          <span>Admin Dashboard</span>
         </mat-toolbar>
         
-        <mat-nav-list>
-          <a mat-list-item routerLink="/admin/dashboard" routerLinkActive="active">
-            <mat-icon>dashboard</mat-icon>
-            <span>Dashboard</span>
-          </a>
+        <div class="nav-content">
+          <mat-nav-list>
+            <a mat-list-item routerLink="/admin/dashboard" routerLinkActive="active">
+              <mat-icon>dashboard</mat-icon>
+              <span>Dashboard</span>
+            </a>
 
-          <a mat-list-item routerLink="/admin/users" routerLinkActive="active">
-            <mat-icon>people</mat-icon>
-            <span>Manage Users</span>
-          </a>
+            <a mat-list-item routerLink="/admin/users" routerLinkActive="active">
+              <mat-icon>people</mat-icon>
+              <span>Manage Users</span>
+            </a>
 
-          <a mat-list-item routerLink="/admin/rooms" routerLinkActive="active">
-            <mat-icon>meeting_room</mat-icon>
-            <span>Manage Rooms</span>
-          </a>
+            <a mat-list-item routerLink="/admin/rooms" routerLinkActive="active">
+              <mat-icon>meeting_room</mat-icon>
+              <span>Manage Rooms</span>
+            </a>
 
-          <a mat-list-item routerLink="/admin/timeslots" routerLinkActive="active">
-            <mat-icon>schedule</mat-icon>
-            <span>Manage Timeslots</span>
-          </a>
+            <a mat-list-item routerLink="/admin/timeslots" routerLinkActive="active">
+              <mat-icon>schedule</mat-icon>
+              <span>Manage Timeslots</span>
+            </a>
 
-          <a mat-list-item routerLink="/admin/classes" routerLinkActive="active">
-            <mat-icon>class</mat-icon>
-            <span>Manage Classes</span>
-          </a>
+            <a mat-list-item routerLink="/admin/classes" routerLinkActive="active">
+              <mat-icon>class</mat-icon>
+              <span>Manage Classes</span>
+            </a>
 
-          <a mat-list-item routerLink="/admin/leave-requests" routerLinkActive="active">
-            <mat-icon>event</mat-icon>
-            <span>Leave Requests</span>
-          </a>
+            <a mat-list-item routerLink="/admin/leave-requests" routerLinkActive="active">
+              <mat-icon>event</mat-icon>
+              <span>Leave Requests</span>
+            </a>
+          </mat-nav-list>
+        </div>
 
+        <div class="bottom-nav">
           <button mat-list-item (click)="logout()">
             <mat-icon>logout</mat-icon>
             <span>Logout</span>
           </button>
-        </mat-nav-list>
+        </div>
       </mat-sidenav>
 
       <mat-sidenav-content>
@@ -80,6 +84,8 @@ import { selectIsAuthenticated } from '@store/auth/auth.selectors';
     mat-sidenav {
       width: 250px;
       box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+      height: 100%;
+      background-color: white;
     }
 
     .sidenav-header {
@@ -87,9 +93,30 @@ import { selectIsAuthenticated } from '@store/auth/auth.selectors';
       display: flex;
       align-items: center;
       padding: 0 16px;
+      background-color: #1976d2;
+      color: white;
+    }
+
+    .nav-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bottom-nav {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    mat-nav-list {
+      padding: 16px 0;
     }
 
     mat-list-item {
+      height: 48px;
+      min-height: 48px;
+      transition: background-color 0.2s;
       display: flex;
       align-items: center;
       gap: 16px;

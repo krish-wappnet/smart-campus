@@ -1,0 +1,73 @@
+.lectures-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin-bottom: 24px;
+  color: var(--primary-text-color);
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.error-message {
+  color: #f44336;
+  text-align: center;
+  padding: 24px;
+  background: #ffebee;
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+
+.classes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.class-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+mat-card-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+mat-card-title {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+mat-card-subtitle {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+mat-card-content {
+  padding: 16px;
+  flex: 1;
+}
+
+mat-card-actions {
+  padding: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  flex: 1;
+  min-width: 120px;
+}
+
+button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

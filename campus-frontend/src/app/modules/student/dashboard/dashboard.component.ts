@@ -10,39 +10,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 
-interface StudentClass {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  facultyId: string;
-  roomId: string;
-  timeslotId: string;
-  faculty: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    email: string;
-    password: string;
-    role: string;
-    name: string;
-  };
-  room: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    name: string;
-    capacity: number;
-  };
-  timeslot: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    startTime: string;
-    endTime: string;
-    dayOfWeek: string;
-  };
-}
+import { StudentClass } from '../../../shared/types';
 
 interface HeatmapData {
   date: string;
