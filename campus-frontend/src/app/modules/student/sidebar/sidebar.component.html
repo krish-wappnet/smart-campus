@@ -1,0 +1,55 @@
+<div class="sidebar-container">
+  <aside class="sidebar" [class.open]="isMobileMenuOpen">
+    <div class="sidebar-header">
+      <h2>
+        <fa-icon [icon]="faBars" class="menu-toggle" (click)="toggleMobileMenu()"></fa-icon>
+        <span>Student Panel</span>
+      </h2>
+    </div>
+    
+    <div class="nav-content">
+      <ul class="nav-list">
+        <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <a routerLink="/student/dashboard">
+            <fa-icon [icon]="faTachometerAlt" class="nav-icon"></fa-icon>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        
+        <li class="nav-item" routerLinkActive="active">
+          <a routerLink="/student/attendance">
+            <fa-icon [icon]="faClipboardCheck" class="nav-icon"></fa-icon>
+            <span>Attendance</span>
+          </a>
+        </li>
+        
+        <li class="nav-item" routerLinkActive="active">
+          <a routerLink="/student/timetable">
+            <fa-icon [icon]="faCalendarAlt" class="nav-icon"></fa-icon>
+            <span>Time Table</span>
+          </a>
+        </li>
+        
+        <li class="nav-item" routerLinkActive="active">
+          <a routerLink="/student/profile">
+            <fa-icon [icon]="faUser" class="nav-icon"></fa-icon>
+            <span>Profile</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <button (click)="logout()">
+          <fa-icon [icon]="faSignOutAlt" class="nav-icon"></fa-icon>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+  
+  <main class="main-content">
+    <ng-content></ng-content>
+  </main>
+</div>

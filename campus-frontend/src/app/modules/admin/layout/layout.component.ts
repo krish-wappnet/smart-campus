@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-admin-layout',
@@ -11,7 +11,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
     CommonModule,
     RouterOutlet,
     SidebarComponent,
-    MatSidenavModule
+    FontAwesomeModule
   ],
   template: `
     <div class="admin-layout">

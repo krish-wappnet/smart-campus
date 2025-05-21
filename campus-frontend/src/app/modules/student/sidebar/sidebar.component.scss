@@ -1,0 +1,175 @@
+// Variables
+$primary-color: #4a6cf7;
+$text-color: #2c3e50;
+$text-light: #7f8c8d;
+$border-color: #eaeef2;
+$hover-bg: #f5f7fa;
+$active-bg: rgba(74, 108, 247, 0.1);
+$transition: all 0.3s ease;
+$shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+// Sidebar container
+.sidebar-container {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// Sidebar
+.sidebar {
+  width: 260px;
+  background: white;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: $shadow;
+  position: relative;
+  z-index: 10;
+}
+
+// Header
+.sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid $border-color;
+  
+  h2 {
+    margin: 0;
+    color: $primary-color;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .menu-toggle {
+    display: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+    
+    @media (max-width: 768px) {
+      display: inline-block;
+    }
+  }
+}
+
+// Navigation content
+.nav-content {
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+}
+
+// Navigation list
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+// Navigation item
+.nav-item {
+  margin: 0.25rem 0.75rem;
+  border-radius: 8px;
+  overflow: hidden;
+  
+  a, button {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: $text-color;
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: $transition;
+    border-radius: 8px;
+    
+    &:hover {
+      background: $hover-bg;
+      color: $primary-color;
+      
+      .nav-icon {
+        color: $primary-color;
+      }
+    }
+    
+    .nav-icon {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+      color: $text-light;
+      transition: $transition;
+      width: 24px;
+      text-align: center;
+    }
+    
+    span {
+      flex: 1;
+    }
+  }
+  
+  &.active {
+    a, button {
+      background: $active-bg;
+      color: $primary-color;
+      font-weight: 600;
+      
+      .nav-icon {
+        color: $primary-color;
+      }
+    }
+  }
+}
+
+// Bottom navigation
+.bottom-nav {
+  padding: 1rem;
+  border-top: 1px solid $border-color;
+  margin-top: auto;
+  
+  .nav-item {
+    margin: 0;
+  }
+}
+
+// Main content
+.main-content {
+  flex: 1;
+  overflow: auto;
+  background-color: #f8fafc;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    transition: $transition;
+    
+    &.open {
+      left: 0;
+    }
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,69 @@
+<div class="sidebar-container">
+  <aside class="sidebar" [class.open]="isMobileMenuOpen">
+    <div class="sidebar-header">
+      <h2>
+        <fa-icon [icon]="faBars" class="menu-toggle" (click)="toggleMobileMenu()"></fa-icon>
+        <span>Admin Panel</span>
+      </h2>
+    </div>
+    
+    <div class="nav-content">
+      <ul class="nav-list">
+        <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <a routerLink="/admin/dashboard">
+            <fa-icon [icon]="faTachometerAlt" class="nav-icon"></fa-icon>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        
+        <li class="nav-item" routerLinkActive="active">
+          <a routerLink="/admin/users">
+            <fa-icon [icon]="faUsers" class="nav-icon"></fa-icon>
+            <span>Manage Users</span>
+          </a>
+        </li>
+        
+        <li class="nav-item" routerLinkActive="active">
+          <a routerLink="/admin/rooms">
+            <fa-icon [icon]="faDoorOpen" class="nav-icon"></fa-icon>
+            <span>Manage Rooms</span>
+          </a>
+        </li>
+        
+        <li class="nav-item" routerLinkActive="active">
+          <a routerLink="/admin/timeslots">
+            <fa-icon [icon]="faClock" class="nav-icon"></fa-icon>
+            <span>Manage Timeslots</span>
+          </a>
+        </li>
+        
+        <li class="nav-item" routerLinkActive="active">
+          <a routerLink="/admin/classes">
+            <fa-icon [icon]="faChalkboardTeacher" class="nav-icon"></fa-icon>
+            <span>Manage Classes</span>
+          </a>
+        </li>
+        
+        <li class="nav-item" routerLinkActive="active">
+          <a routerLink="/admin/leave-requests">
+            <fa-icon [icon]="faCalendarAlt" class="nav-icon"></fa-icon>
+            <span>Leave Requests</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <button (click)="logout()">
+          <fa-icon [icon]="faSignOutAlt" class="nav-icon"></fa-icon>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+  
+  <main class="main-content">
+    <ng-content></ng-content>
+  </main>
+</div>

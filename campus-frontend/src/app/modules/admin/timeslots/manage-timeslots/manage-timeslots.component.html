@@ -1,0 +1,117 @@
+<div class="manage-timeslots">
+  <div class="page-header">
+    <h2>
+      <fa-icon [icon]="faClock" class="me-2"></fa-icon>
+      Manage Timeslots
+    </h2>
+    <button class="btn" (click)="openAddTimeslotDialog()">
+      <fa-icon [icon]="faPlus"></fa-icon>
+      Add Timeslot
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Timeslot List</h3>
+      <div class="search-box">
+        <fa-icon [icon]="faSearch"></fa-icon>
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (input)="applyFilter()" 
+          placeholder="Search timeslots..."
+          class="form-control"
+        >
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let timeslot of paginatedTimeslots">
+              <td>
+                <div class="timeslot-info">
+                  <div class="timeslot-avatar">
+                    <fa-icon [icon]="faClock"></fa-icon>
+                  </div>
+                  <div class="timeslot-details">
+                    <div class="timeslot-day">{{ formatDay(timeslot.dayOfWeek) }}</div>
+                    <div class="timeslot-time">{{ formatTime(timeslot.startTime) }} - {{ formatTime(timeslot.endTime) }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>{{ formatTime(timeslot.startTime) }}</td>
+              <td>{{ formatTime(timeslot.endTime) }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button (click)="editTimeslot(timeslot)" title="Edit timeslot" class="btn-icon">
+                    <fa-icon [icon]="faEdit"></fa-icon>
+                  </button>
+                  <button (click)="deleteTimeslot(timeslot.id)" class="delete" title="Delete timeslot">
+                    <fa-icon [icon]="faTrash"></fa-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="isLoading">
+              <td colspan="4" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!isLoading && filteredTimeslots.length === 0">
+              <td colspan="4" class="text-center py-4">
+                <div class="text-muted">
+                  <fa-icon [icon]="faClock" size="2x" class="mb-3"></fa-icon>
+                  <h5>No timeslots found</h5>
+                  <p class="mb-0">
+                    {{ searchTerm ? 'No timeslots match your search.' : 'Get started by adding a new timeslot.' }}
+                  </p>
+                  <button 
+                    *ngIf="!searchTerm" 
+                    class="btn btn-primary mt-3"
+                    (click)="openAddTimeslotDialog()"
+                  >
+                    <fa-icon [icon]="faPlus" class="me-2"></fa-icon> Add Your First Timeslot
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4" *ngIf="totalItems > itemsPerPage">
+        <div class="text-muted">
+          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to 
+          {{ getEndIndex() }} of {{ totalItems }} timeslots
+        </div>
+        <ngb-pagination
+          [collectionSize]="totalItems"
+          [(page)]="currentPage"
+          [pageSize]="itemsPerPage"
+          [maxSize]="5"
+          [rotate]="true"
+          [ellipses]="true"
+          [boundaryLinks]="true"
+          (pageChange)="onPageChange($event)"
+          class="mb-0">
+        </ngb-pagination>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #addTimeslotModal>
+  <app-add-timeslot (timeslotAdded)="loadTimeslots()"></app-add-timeslot>
+</ng-template>

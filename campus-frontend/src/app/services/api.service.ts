@@ -228,6 +228,20 @@ export class ApiService {
     );
   }
 
+  updateRoom(roomData: any): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.put<any>(`${this.apiUrl}/rooms/${roomData.id}`, roomData, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
   getRooms(): Observable<any> {
     const token = this.getToken();
     if (!token) {

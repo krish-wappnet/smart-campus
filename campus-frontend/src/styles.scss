@@ -1,4 +1,85 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+// Global Variables
+:root {
+  // Colors
+  --primary: #4a6cf7;
+  --secondary: #6c757d;
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --info: #17a2b8;
+  --light: #f8f9fa;
+  --dark: #343a40;
+  
+  // Spacing
+  --spacer: 1rem;
+  
+  // Border radius
+  --border-radius: 0.375rem;
+  --border-radius-lg: 0.5rem;
+  --border-radius-sm: 0.25rem;
+  
+  // Box shadow
+  --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  
+  // Transitions
+  --transition-base: all 0.2s ease-in-out;
+  
+  // Z-index
+  --zindex-dropdown: 1000;
+  --zindex-sticky: 1020;
+  --zindex-fixed: 1030;
+  --zindex-modal-backdrop: 1040;
+  --zindex-modal: 1050;
+  --zindex-popover: 1060;
+  --zindex-tooltip: 1070;
+}
+
+// SCSS variables for backward compatibility
+// Note: These are static values for SCSS functions
+$primary: #4a6cf7;
+$secondary: #6c757d;
+$success: #28a745;
+$danger: #dc3545;
+$warning: #ffc107;
+$info: #17a2b8;
+$light: #f8f9fa;
+$dark: #343a40;
+$spacer: 1rem;
+$border-radius: 0.375rem;
+$border-radius-lg: 0.5rem;
+$border-radius-sm: 0.25rem;
+$box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+$box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+$box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+$transition-base: all 0.2s ease-in-out;
+$gray-200: #e9ecef;
+
+// Base styles
+html, body { 
+  height: 100%; 
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  color: #333;
+  background-color: #f5f7fb;
+}
+
+// Global utility classes
+.text-primary { color: $primary; }
+.bg-primary { background-color: $primary; }
+.btn-primary { 
+  background-color: var(--primary, #{$primary});
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: var(--transition-base, #{$transition-base});
+  
+  &:hover {
+    background-color: var(--primary-dark, #{darken($primary, 10%)});
+  }
+}
