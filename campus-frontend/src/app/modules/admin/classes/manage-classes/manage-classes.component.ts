@@ -1,11 +1,15 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+
+// Angular Material Modules
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
-import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatSortModule, MatSort, Sort } from '@angular/material/sort';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,16 +17,60 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDividerModule } from '@angular/material/divider';
+
 import { ApiService } from '@services/api.service';
 import { Class } from '../class.interface';
 import { AddClassComponent } from '../add-class/add-class.component';
-// Using MatDialog for confirmation instead of a separate component
+
+// Simple confirm dialog component since we don't have the shared one
+@Component({
+  selector: 'app-confirm-dialog',
+  template: `
+    <h2 mat-dialog-title>{{ data.title || 'Confirm' }}</h2>
+    <mat-dialog-content>
+      {{ data.message || 'Are you sure you want to continue?' }}
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button [mat-dialog-close]="false" color="warn">
+        {{ data.cancelText || 'Cancel' }}
+      </button>
+      <button 
+        mat-button 
+        [mat-dialog-close]="true" 
+        [color]="data.confirmColor === 'warn' ? 'warn' : 'primary'"
+        [class.mat-primary]="!data.confirmColor || data.confirmColor === 'primary'"
+        [class.mat-warn]="data.confirmColor === 'warn'"
+        [class.mat-accent]="data.confirmColor === 'accent'">
+        {{ data.confirmText || 'Confirm' }}
+      </button>
+    </mat-dialog-actions>
+  `,
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatButtonModule
+  ]
+})
+export class ConfirmDialogComponent {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any) {}
+}
 
 @Component({
   selector: 'app-manage-classes',
   standalone: true,
+  styleUrls: ['./manage-classes.component.scss'],
   imports: [
     CommonModule,
+    RouterModule,
+    ReactiveFormsModule,
+    FormsModule,
+    
+    // Material Modules
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -31,75 +79,110 @@ import { AddClassComponent } from '../add-class/add-class.component';
     MatDialogModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-    AddClassComponent
+    MatFormFieldModule,
+    MatInputModule,
+    MatMenuModule,
+    MatChipsModule,
+    MatSnackBarModule,
+    MatCardModule,
+    MatSelectModule,
+    MatProgressBarModule,
+    
+    // Shared Components
+    AddClassComponent,
+    ConfirmDialogComponent
   ],
   template: `
-    <div class="manage-classes-container">
-      <div class="header">
-        <h2>Manage Classes</h2>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="openAddClassDialog()"
-          class="add-button"
-        >
-          <mat-icon>add</mat-icon>
-          Add Class
-        </button>
+    <div class="manage-classes">
+      <!-- Page Header -->
+      <div class="admin-page__header">
+        <h1 class="admin-page__header-title">Manage Classes</h1>
+        <div class="admin-page__header-actions">
+          <button mat-raised-button color="primary" (click)="openAddClassDialog()">
+            <mat-icon>add</mat-icon>
+            <span class="button-text">Add Class</span>
+          </button>
+        </div>
       </div>
 
-      <div class="table-container">
-        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-          <!-- Name Column -->
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>Class Name</th>
-            <td mat-cell *matCellDef="let cls">{{ cls.name }}</td>
-          </ng-container>
-
-          <!-- Faculty Column -->
-          <ng-container matColumnDef="faculty">
-            <th mat-header-cell *matHeaderCellDef>Faculty</th>
-            <td mat-cell *matCellDef="let cls">
-              <div class="faculty-info">
-                <div class="faculty-name">{{ cls.faculty?.name }}</div>
-                <div class="faculty-email" *ngIf="cls.faculty?.email">{{ cls.faculty.email }}</div>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Room Column -->
-          <ng-container matColumnDef="room">
-            <th mat-header-cell *matHeaderCellDef>Room</th>
-            <td mat-cell *matCellDef="let cls">
-              <div *ngIf="cls.room">
-                <div class="room-name">{{ cls.room.name }}</div>
-                <div class="room-capacity" *ngIf="cls.room.capacity">
-                  Capacity: {{ cls.room.capacity }}
+      <!-- Main Content -->
+      <div class="admin-page__content">
+        <!-- Search and Filters -->
+        <div class="search-container">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search Classes</mat-label>
+            <input matInput 
+                  #searchInput
+                  type="text"
+                  placeholder="Search by name, code, or instructor..." 
+                  (keyup)="applyFilter(searchInput.value)"
+                  [disabled]="isLoading">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
+        
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-spinner">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading classes...</p>
+        </div>
+        
+        <!-- No Results -->
+        <div *ngIf="!isLoading && dataSource.filteredData.length === 0" class="no-results">
+          <mat-icon>search_off</mat-icon>
+          <p>No classes found. Try adjusting your search or add a new class.</p>
+          <button mat-stroked-button color="primary" (click)="openAddClassDialog()">
+            <mat-icon>add</mat-icon>
+            <span>Add New Class</span>
+          </button>
+        </div>
+        <!-- Class Table -->
+        <div class="table-responsive" *ngIf="!isLoading && dataSource.filteredData.length > 0">
+          <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-1">
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Class Name</th>
+              <td mat-cell *matCellDef="let classItem">
+                <div class="class-name">
+                  <mat-icon class="class-icon" [ngStyle]="{'background-color': classItem.color + '20', 'color': classItem.color}">
+                    class_
+                  </mat-icon>
+                  <div>
+                    <div class="class-title">{{classItem.name}}</div>
+                    <div class="class-subtitle">{{classItem.code}}</div>
+                  </div>
                 </div>
-              </div>
-              <div *ngIf="!cls.room">
-                -
-              </div>
-            </td>
-          </ng-container>
+              </td>
+            </ng-container>
 
-          <!-- Timeslot Column -->
-          <ng-container matColumnDef="timeslot">
-            <th mat-header-cell *matHeaderCellDef>Schedule</th>
-            <td mat-cell *matCellDef="let cls">
-              <div *ngIf="cls.timeslot" class="timeslot-info">
-                <div class="day">
-                  <mat-icon>event</mat-icon>
-                  {{ cls.timeslot.dayOfWeek ? (cls.timeslot.dayOfWeek | titlecase) : '' }}
+            <!-- Instructor Column -->
+            <ng-container matColumnDef="instructor">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Instructor</th>
+              <td mat-cell *matCellDef="let classItem">
+                <div class="instructor-info">
+                  <mat-icon>person</mat-icon>
+                  <span>{{classItem.instructor || 'Not assigned'}}</span>
                 </div>
-                <div class="time" *ngIf="cls.timeslot.startTime && cls.timeslot.endTime">
-                  <mat-icon>schedule</mat-icon>
-                  {{ cls.timeslot.startTime }} - {{ cls.timeslot.endTime }}
+              </td>
+            </ng-container>
+
+            <!-- Schedule Column -->
+            <ng-container matColumnDef="schedule">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Schedule</th>
+              <td mat-cell *matCellDef="let classItem">
+                <div *ngIf="classItem.timeslot" class="timeslot-info">
+                  <div class="day">
+                    <mat-icon>event</mat-icon>
+                    {{ classItem.timeslot.dayOfWeek ? (classItem.timeslot.dayOfWeek | titlecase) : 'No day set' }}
+                  </div>
+                  <div class="time" *ngIf="classItem.timeslot.startTime && classItem.timeslot.endTime">
+                    <mat-icon>schedule</mat-icon>
+                    {{ classItem.timeslot.startTime }} - {{ classItem.timeslot.endTime }}
+                  </div>
                 </div>
-              </div>
-              <div *ngIf="!cls.timeslot">Not scheduled</div>
-            </td>
-          </ng-container>
+                <div *ngIf="!classItem.timeslot">Not scheduled</div>
+              </td>
+            </ng-container>
 
 
 
@@ -112,7 +195,7 @@ import { AddClassComponent } from '../add-class/add-class.component';
           showFirstLastButtons
         ></mat-paginator>
 
-        <div *ngIf="loading" class="loading-spinner">
+        <div *ngIf="isLoading" class="loading-spinner">
           <mat-spinner diameter="40"></mat-spinner>
           <p>Loading classes...</p>
         </div>
@@ -297,22 +380,44 @@ export class ManageClassesComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns: string[] = ['name', 'faculty', 'room', 'timeslot'];
-  dataSource = new MatTableDataSource<Class>([]);
-  loading: boolean = true;
+  // Component state
+  isLoading = true;
+  searchTerm = '';
   selectedRow: Class | null = null;
-  selectedClass: Class | null = null;
-  searchTerm: string = '';
-  currentFilter: string = '';
-  classes: Class[] = [];
+
+  // Table configuration
+  displayedColumns: string[] = ['name', 'instructor', 'schedule', 'capacity', 'status', 'actions'];
+  dataSource = new MatTableDataSource<Class>([]);
+
+  // Page title for the layout
+  pageTitle = 'Manage Classes';
+
+  // Status options for filtering
+  statusOptions = [
+    { value: 'active', viewValue: 'Active' },
+    { value: 'upcoming', viewValue: 'Upcoming' },
+    { value: 'completed', viewValue: 'Completed' },
+    { value: 'cancelled', viewValue: 'Cancelled' }
+  ];
+  selectedStatus: string[] = [];
 
   constructor(
-    private api: ApiService,
     private dialog: MatDialog,
+    private api: ApiService,
     private snackBar: MatSnackBar
-  ) {}
+  ) {
+    // Set up custom filter predicate
+    this.dataSource.filterPredicate = this.createFilter();
+  }
 
   ngOnInit(): void {
+    // Initialize the filter with default values
+    this.dataSource.filter = JSON.stringify({
+      search: this.searchTerm,
+      statuses: this.selectedStatus
+    });
+    
+    // Load the classes
     this.loadClasses();
   }
 
@@ -321,110 +426,187 @@ export class ManageClassesComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.searchTerm = filterValue.trim().toLowerCase();
-    this.dataSource.filter = this.searchTerm;
-  }
-
-  filterByDay(day: string) {
-    this.currentFilter = day;
-    this.dataSource.filter = day;
-  }
-
-  clearFilters() {
-    this.currentFilter = '';
-    this.searchTerm = '';
-    this.dataSource.filter = '';
-  }
-
-  getStatusClass(cls: Class): string {
-    // Implement status logic based on current time and class schedule
-    return 'upcoming';
-  }
-
-  getStatusText(cls: Class): string {
-    // Return status text based on class schedule
-    return 'Upcoming';
-  }
-
-  getStatusTooltip(cls: Class): string {
-    // Return tooltip text for status
-    return 'Class is scheduled for the future';
-  }
-
-  selectRow(row: Class) {
-    this.selectedRow = this.selectedRow === row ? null : row;
-  }
-
-  editClass(cls: Class) {
-    // Implement edit functionality
-    console.log('Edit class:', cls);
-  }
-
-  confirmDelete(cls: Class) {
-    this.selectedClass = cls;
-    // Open confirmation dialog using MatDialog directly
-    const dialogRef = this.dialog.open(MatDialog, {
-      width: '400px',
-      data: {
-        title: 'Delete Class',
-        message: `Are you sure you want to delete ${cls.name}?`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.deleteClass();
-      }
-    });
-  }
-
-  deleteClass() {
-    if (!this.selectedClass?.id) return;
+  /**
+   * Apply filter to the table
+   * @param filterValue The filter value from the input
+   */
+  applyFilter(filterValue: string | null | undefined): void {
+    // Update the search term
+    this.searchTerm = (filterValue || '').trim().toLowerCase();
     
-    this.api.deleteClass(this.selectedClass.id).subscribe({
-      next: () => {
-        this.snackBar.open('Class deleted successfully', 'Close', { duration: 3000 });
-        this.loadClasses();
-      },
-      error: (error) => {
-        console.error('Error deleting class:', error);
-        this.snackBar.open('Error deleting class', 'Close', { duration: 3000 });
+    // Create a filter object that includes both search term and status filters
+    const filter = JSON.stringify({
+      search: this.searchTerm,
+      statuses: this.selectedStatus
+    });
+    
+    // Apply the filter
+    this.dataSource.filter = filter;
+
+    // Reset to first page when filtering
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
+
+  /**
+   * Create custom filter predicate for the table
+   */
+  private createFilter(): (data: Class, filter: string) => boolean {
+    return (data: Class, filter: string): boolean => {
+      // Parse the filter string back to an object
+      let filterObj: { search?: string; statuses?: string[] } = { search: '', statuses: [] };
+      try {
+        filterObj = JSON.parse(filter) || {};
+      } catch (e) {
+        // If parsing fails, treat it as a simple search string
+        filterObj = { search: filter, statuses: [] };
       }
+
+      // Ensure we have default values
+      const searchTerm = (filterObj.search || '').toLowerCase();
+      const statuses = Array.isArray(filterObj.statuses) ? filterObj.statuses : [];
+
+      // Check if class matches search term
+      const matchesSearch = !searchTerm || [
+        data.name?.toLowerCase() || '',
+        data.code?.toLowerCase() || '',
+        data.instructor?.toLowerCase() || '',
+        data.schedule?.toLowerCase() || ''
+      ].some(value => value.includes(searchTerm));
+
+      // Check if class matches any selected status
+      const classStatus = this.getClassStatus(data);
+      const matchesStatus = statuses.length === 0 || statuses.includes(classStatus);
+
+      return matchesSearch && matchesStatus;
+    };
+  }
+
+  /**
+   * Get status of a class based on current date and schedule
+   * @param cls The class to get the status for
+   * @returns A valid status string: 'active', 'upcoming', 'completed', or 'cancelled'
+   */
+  private getClassStatus(cls: Class): 'active' | 'upcoming' | 'completed' | 'cancelled' {
+    // If status is explicitly set and valid, use that
+    if (cls.status && ['active', 'upcoming', 'completed', 'cancelled'].includes(cls.status)) {
+      return cls.status as 'active' | 'upcoming' | 'completed' | 'cancelled';
+    }
+    
+    // If class is explicitly cancelled, return that
+    if (cls.status === 'cancelled') {
+      return 'cancelled';
+    }
+    
+    // Otherwise determine status based on dates
+    try {
+      const now = new Date();
+      const startDate = cls.startDate ? new Date(cls.startDate) : null;
+      const endDate = cls.endDate ? new Date(cls.endDate) : null;
+
+      // If no start date, default to upcoming
+      if (!startDate || isNaN(startDate.getTime())) {
+        return 'upcoming';
+      }
+
+      // If end date is valid and current date is after end date, class is completed
+      if (endDate && !isNaN(endDate.getTime()) && now > endDate) {
+        return 'completed';
+      }
+
+      // If current date is after or equal to start date, class is active
+      if (now >= startDate) {
+        return 'active';
+      }
+
+      // Default to upcoming if none of the above conditions are met
+      return 'upcoming';
+    } catch (error) {
+      console.error('Error determining class status:', error);
+      return 'upcoming'; // Default to upcoming in case of any errors
+    }
+  }
+
+  /**
+   * Get status display text
+   */
+  getStatusText(cls: Class): string {
+    const status = this.getClassStatus(cls);
+    switch (status) {
+      case 'active': return 'In Session';
+      case 'upcoming': return 'Upcoming';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      default: return 'Scheduled';
+    }
+  }
+
+  /**
+   * Get status class for styling
+   */
+  getStatusClass(cls: Class): string {
+    const status = this.getClassStatus(cls);
+    return `status-${status}`;
+  }
+
+  /**
+   * Load classes from the API
+   */
+  loadClasses() {
+    this.isLoading = true;
+
+    // Simulate API call with timeout
+    setTimeout(() => {
+      this.api.getClasses().subscribe({
+        next: (classes) => {
+          this.dataSource.data = classes;
+          
+          // Initialize the filter with empty values
+          this.dataSource.filter = JSON.stringify({
+            search: this.searchTerm,
+            statuses: this.selectedStatus
+          });
+          
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading classes:', error);
+          this.showError('Failed to load classes. Please try again.');
+          this.isLoading = false;
+        }
+      });
+    }, 500); // Simulate network delay
+  }
+
+  /**
+   * Show error message
+   * @param message The error message to display
+   */
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Dismiss', {
+      duration: 5000,
+      panelClass: ['error-snackbar']
     });
   }
 
-  loadClasses(): void {
-    this.loading = true;
-    this.api.getClasses().subscribe({
-      next: (data: Class[]) => {
-        this.classes = data;
-        this.dataSource.data = data;
-        this.loading = false;
-      },
-      error: (error: any) => {
-        console.error('Error loading classes:', error);
-        this.loading = false;
-        this.snackBar.open('Error loading classes', 'Close', { duration: 3000 });
-      }
-    });
+  /**
+   * Format date for display
+   */
+  private formatDate(date: string | Date | undefined): string {
+    if (!date) return 'Not scheduled';
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? 'Invalid date' : d.toLocaleDateString();
   }
 
-  onRowClicked(row: Class) {
-    this.selectedRow = this.selectedRow === row ? null : row;
-  }
-
-  exportToExcel() {
-    this.snackBar.open('Export to Excel functionality will be implemented soon', 'Close', { duration: 3000 });
-  }
-
-  openAddClassDialog() {
+  /**
+   * Open the add class dialog
+   */
+  openAddClassDialog(classToEdit?: Class): void {
     const dialogRef = this.dialog.open(AddClassComponent, {
       width: '600px',
-      disableClose: true
+      disableClose: true,
+      data: classToEdit ? { ...classToEdit } : null
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -432,5 +614,130 @@ export class ManageClassesComponent implements OnInit, AfterViewInit {
         this.loadClasses();
       }
     });
+  }
+  
+  /**
+   * Edit a class
+   * @param classToEdit The class to edit
+   */
+  editClass(classToEdit: Class): void {
+    this.openAddClassDialog(classToEdit);
+  }
+  
+  /**
+   * View class details
+   */
+  viewClassDetails(cls: Class): void {
+    // In a real app, you might navigate to a details page or open a dialog
+    this.snackBar.open(`Viewing details for ${cls.name}`, 'Close', {
+      duration: 3000
+    });
+  }
+
+  /**
+   * Delete a class after confirmation
+   * @param classToDelete The class to delete
+   */
+  deleteClass(classToDelete: Class): void {
+    if (!classToDelete.id) {
+      this.showError('Cannot delete class: Invalid class ID');
+      return;
+    }
+    
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Confirm Delete',
+        message: `Are you sure you want to delete the class "${classToDelete.name}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        confirmColor: 'warn'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed && classToDelete.id) {
+        this.performDelete(classToDelete.id);
+      } else if (confirmed) {
+        console.error('Cannot delete class: No class ID provided');
+        this.showError('Cannot delete class: Invalid class ID');
+      }
+    });
+  }
+  
+  /**
+   * Perform the actual delete operation
+   * @param classId The ID of the class to delete
+   */
+  private performDelete(classId: string): void {
+    this.isLoading = true;
+    
+    // In a real app, you would call your API service
+    // this.api.deleteClass(classId).subscribe({
+    //   next: () => {
+    //     this.showSuccess('Class deleted successfully');
+    //     this.loadClasses();
+    //   },
+    //   error: (error) => {
+    //     console.error('Error deleting class:', error);
+    //     this.showError('Failed to delete class. Please try again.');
+    //     this.isLoading = false;
+    //   }
+    // });
+    
+    // For demo purposes, simulate API call
+    setTimeout(() => {
+      this.showSuccess('Class deleted successfully');
+      this.dataSource.data = this.dataSource.data.filter(c => c.id !== classId);
+      this.isLoading = false;
+    }, 1000);
+  }
+  
+  /**
+   * Show success message
+   */
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar']
+    });
+  }
+  
+  /**
+   * Apply status filters
+   * @param status The status to filter by
+   * @param event The checkbox change event
+   */
+  applyStatusFilter(status: 'active' | 'upcoming' | 'completed' | 'cancelled', event: { checked: boolean }): void {
+    try {
+      // Update selected statuses based on checkbox state
+      if (event.checked) {
+        // Only add the status if it's not already in the array
+        if (!this.selectedStatus.includes(status)) {
+          this.selectedStatus = [...this.selectedStatus, status];
+        }
+      } else {
+        // Remove the status from the array
+        this.selectedStatus = this.selectedStatus.filter(s => s !== status);
+      }
+      
+      // Create a filter object with the current search term and selected statuses
+      const filterValue = JSON.stringify({
+        search: this.searchTerm || '',
+        statuses: this.selectedStatus
+      });
+      
+      // Apply the filter
+      this.dataSource.filter = filterValue;
+      
+      // Reset to first page when filtering
+      if (this.dataSource.paginator) {
+        this.dataSource.paginator.firstPage();
+      }
+    } catch (error) {
+      console.error('Error applying status filter:', error);
+      // Reset to default state if there's an error
+      this.selectedStatus = [];
+      this.dataSource.filter = '';
+    }
   }
 }

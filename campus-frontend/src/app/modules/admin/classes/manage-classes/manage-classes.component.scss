@@ -1,0 +1,168 @@
+@use '../../../admin/shared/admin-styles' as admin;
+
+.manage-classes {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--admin-background);
+  padding: var(--admin-spacing-md);
+  
+  .search-container {
+    margin-bottom: var(--admin-spacing-md);
+    
+    .search-field {
+      width: 100%;
+      max-width: 400px;
+    }
+  }
+  
+  .mat-table {
+    width: 100%;
+    background: var(--admin-card);
+    border-radius: var(--admin-border-radius);
+    overflow: hidden;
+    box-shadow: var(--admin-shadow-sm);
+    
+    .mat-header-row {
+      background-color: var(--admin-background);
+    }
+    
+    .mat-row {
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: var(--admin-hover);
+      }
+      
+      &.selected {
+        background-color: var(--admin-selected);
+      }
+    }
+    
+    .mat-cell, .mat-header-cell {
+      padding: var(--admin-spacing-md);
+      
+      &:first-child {
+        padding-left: var(--admin-spacing-lg);
+      }
+      
+      &:last-child {
+        padding-right: var(--admin-spacing-lg);
+      }
+    }
+    
+    .mat-column-actions {
+      text-align: right;
+      white-space: nowrap;
+      
+      button {
+        margin-left: var(--admin-spacing-xs);
+        
+        .mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          line-height: 20px;
+        }
+      }
+    }
+  }
+  
+  .mat-paginator {
+    background: var(--admin-card);
+    border-top: 1px solid var(--admin-divider);
+    border-radius: 0 0 var(--admin-border-radius) var(--admin-border-radius);
+  }
+  
+  .no-results {
+    padding: var(--admin-spacing-lg);
+    text-align: center;
+    color: var(--admin-text-secondary);
+    background: var(--admin-card);
+    border-radius: var(--admin-border-radius);
+    margin-top: var(--admin-spacing-md);
+    
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: var(--admin-spacing-md);
+      color: var(--admin-text-secondary);
+      opacity: 0.7;
+    }
+    
+    p {
+      margin-bottom: var(--admin-spacing-md);
+      font-size: 1.1rem;
+    }
+    
+    button {
+      margin-top: var(--admin-spacing-sm);
+    }
+  }
+  
+  .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--admin-spacing-xl) 0;
+    
+    p {
+      margin-top: var(--admin-spacing-md);
+      color: var(--admin-text-secondary);
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 959px) {
+  .mat-table {
+    .mat-cell, .mat-header-cell {
+      padding: var(--admin-spacing-sm) var(--admin-spacing-md) !important;
+      
+      &:first-child {
+        padding-left: var(--admin-spacing-md) !important;
+      }
+      
+      &:last-child {
+        padding-right: var(--admin-spacing-md) !important;
+      }
+    }
+  }
+}
+
+@media (max-width: 599px) {
+  .mat-table {
+    .mat-cell, .mat-header-cell {
+      padding: var(--admin-spacing-xs) var(--admin-spacing-sm) !important;
+      font-size: 0.85rem;
+      
+      &:first-child {
+        padding-left: var(--admin-spacing-sm) !important;
+      }
+      
+      &:last-child {
+        padding-right: var(--admin-spacing-sm) !important;
+      }
+    }
+    
+    .mat-column-actions {
+      button {
+        min-width: 36px;
+        padding: 0 var(--admin-spacing-xs);
+        
+        .mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          line-height: 18px;
+        }
+        
+        span {
+          display: none;
+        }
+      }
+    }
+  }
+}

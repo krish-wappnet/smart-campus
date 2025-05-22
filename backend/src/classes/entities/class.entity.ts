@@ -5,6 +5,7 @@ import { User } from '../../users/entities/user.entity';
 import { Room } from '../../rooms/entities/room.entity';
 import { Timeslot } from '../../timeslots/entities/timeslot.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
+import { Enrollment } from './enrollment.entity';
 
 @Entity('classes')
 export class Class extends BaseEntity {
@@ -36,6 +37,11 @@ export class Class extends BaseEntity {
   @JoinColumn({ name: 'timeslotId' })
   timeslot: Timeslot;
 
-  @OneToMany(() => Attendance, (attendance) => attendance.class)
-  attendances: Attendance[];
+  @ApiProperty({ description: 'Attendance records for this class' })
+  @OneToMany(() => Attendance, (attendance) => attendance.class, { lazy: true })
+  attendances: Promise<Attendance[]>;
+
+  @ApiProperty({ description: 'Enrollments for this class' })
+  @OneToMany(() => Enrollment, (enrollment) => enrollment.class, { lazy: true })
+  enrollments: Promise<Enrollment[]>;
 }

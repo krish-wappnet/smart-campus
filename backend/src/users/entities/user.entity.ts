@@ -6,6 +6,7 @@ import { Class } from '../../classes/entities/class.entity';
 import { Attendance } from '../../attendance/entities/attendance.entity';
 import { ActivityLog } from '../../activity-logs/entities/activity-log.entity';
 import { LeaveRequest } from '../../leave-requests/entities/leave-request.entity';
+import { Enrollment } from '../../classes/entities/enrollment.entity';
 
 export enum Role {
   ADMIN = 'admin',
@@ -32,18 +33,22 @@ export class User extends BaseEntity {
   @Column()
   name: string;
 
-  @OneToMany(() => Class, (cls) => cls.faculty)
-  classes: Class[];
+  @OneToMany(() => Class, (cls) => cls.faculty, { lazy: true })
+  classes: Promise<Class[]>;
 
-  @OneToMany(() => Attendance, (attendance) => attendance.student)
-  attendances: Attendance[];
+  @OneToMany(() => Attendance, (attendance) => attendance.student, { lazy: true })
+  attendances: Promise<Attendance[]>;
 
-  @OneToMany(() => ActivityLog, (activityLog) => activityLog.student)
-  activityLogs: ActivityLog[];
+  @OneToMany(() => ActivityLog, (activityLog) => activityLog.student, { lazy: true })
+  activityLogs: Promise<ActivityLog[]>;
 
-  @OneToMany(() => LeaveRequest, (leaveRequest) => leaveRequest.faculty)
-  leaveRequests: LeaveRequest[];
+  @OneToMany(() => LeaveRequest, (leaveRequest) => leaveRequest.faculty, { lazy: true })
+  leaveRequests: Promise<LeaveRequest[]>;
 
-  @OneToMany(() => LeaveRequest, (leaveRequest) => leaveRequest.substitute)
-  substituteLeaveRequests: LeaveRequest[];
+  @OneToMany(() => LeaveRequest, (leaveRequest) => leaveRequest.substitute, { lazy: true })
+  substituteLeaveRequests: Promise<LeaveRequest[]>;
+
+  @ApiProperty({ description: 'Enrollments of the student' })
+  @OneToMany(() => Enrollment, (enrollment) => enrollment.student, { lazy: true })
+  enrollments: Promise<Enrollment[]>;
 }

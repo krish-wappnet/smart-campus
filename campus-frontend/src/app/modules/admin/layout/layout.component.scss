@@ -1,0 +1,186 @@
+@use '../shared/admin-styles' as admin;
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--admin-background);
+  color: var(--admin-text-primary);
+  
+  .sidebar {
+    width: 250px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+  }
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin-left: 250px; // Match sidebar width
+    transition: margin 0.3s ease;
+    
+    @media (max-width: 959px) {
+      margin-left: 0;
+      
+      .sidebar.collapsed + & {
+        margin-left: 0;
+      }
+    }
+  }
+  
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: var(--admin-surface);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    
+    &-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      height: 64px;
+      
+      @media (max-width: 599px) {
+        padding: 0 16px;
+        height: 56px;
+      }
+    }
+    
+    .page-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--admin-text-primary);
+      
+      @media (max-width: 599px) {
+        font-size: 18px;
+      }
+    }
+    
+    .top-bar-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    ::ng-deep .mat-progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+  }
+  
+  .content {
+    flex: 1;
+    padding: 24px;
+    
+    @media (max-width: 959px) {
+      padding: 16px;
+    }
+    
+    @media (max-width: 599px) {
+      padding: 12px;
+    }
+  }
+  
+  .footer {
+    background-color: var(--admin-surface);
+    border-top: 1px solid var(--admin-divider);
+    padding: 16px 24px;
+    
+    &-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      
+      @media (max-width: 599px) {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+      }
+    }
+    
+    .copyright {
+      font-size: 13px;
+      color: var(--admin-text-secondary);
+    }
+    
+    .footer-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      
+      .footer-link {
+        color: var(--admin-text-secondary);
+        text-decoration: none;
+        font-size: 13px;
+        transition: color 0.2s ease;
+        
+        &:hover {
+          color: var(--admin-primary);
+          text-decoration: underline;
+        }
+      }
+      
+      .divider {
+        color: var(--admin-divider);
+        font-size: 16px;
+        line-height: 1;
+      }
+    }
+  }
+}
+
+// Responsive sidebar toggle
+@media (max-width: 959px) {
+  .sidebar {
+    position: fixed;
+    left: -250px;
+    transition: left 0.3s ease;
+    
+    &.open {
+      left: 0;
+    }
+  }
+  
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    
+    &.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
+// Dark theme overrides
+.dark-theme {
+  .sidebar {
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .top-bar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+}

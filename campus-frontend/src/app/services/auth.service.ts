@@ -13,12 +13,62 @@ export class AuthService {
   private tokenSubject = new BehaviorSubject<string | null>(null);
 
   constructor(private http: HttpClient) {
-    const savedUser = localStorage.getItem('user');
-    const savedToken = localStorage.getItem('token');
+    console.log('Initializing AuthService...');
     
-    if (savedUser && savedToken) {
-      this.userSubject.next(JSON.parse(savedUser));
-      this.tokenSubject.next(savedToken);
+    // Check for token in both possible locations
+    const authToken = localStorage.getItem('auth_token');
+    const legacyToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    console.log('Found tokens - auth_token:', !!authToken, 'token:', !!legacyToken);
+    console.log('Found saved user:', savedUser);
+    
+    // Use auth_token if available, otherwise fall back to token
+    const token = authToken || legacyToken;
+    
+    if (token) {
+      console.log('Token found, processing...');
+      this.tokenSubject.next(token);
+      
+      try {
+        // Try to decode the token to get user info
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('Decoded token payload:', payload);
+        
+        if (payload && (payload.sub || payload.userId)) {
+          const userId = payload.sub || payload.userId;
+          console.log('User ID from token:', userId);
+          
+          // If we have a saved user, use it
+          if (savedUser) {
+            try {
+              const user = JSON.parse(savedUser);
+              console.log('Loaded user from localStorage:', user);
+              this.userSubject.next(user);
+            } catch (e) {
+              console.error('Error parsing saved user:', e);
+            }
+          } else {
+            // Otherwise create a minimal user from the token
+            const user: User = {
+              id: userId,
+              email: payload.email || 'unknown@example.com',
+              name: payload.name || payload.email?.split('@')[0] || 'User',
+              role: payload.role || 'STUDENT',
+              status: 'ACTIVE',
+              createdAt: new Date(),
+              updatedAt: new Date()
+            };
+            console.log('Created user from token:', user);
+            this.userSubject.next(user);
+            localStorage.setItem('user', JSON.stringify(user));
+          }
+        }
+      } catch (e) {
+        console.error('Error processing token:', e);
+      }
+    } else {
+      console.log('No token found in localStorage');
     }
   }
 
@@ -61,6 +111,13 @@ export class AuthService {
 
   private setToken(token: string): void {
     this.tokenSubject.next(token);
+    // Store in both 'token' and 'auth_token' for compatibility
     localStorage.setItem('token', token);
+    localStorage.setItem('auth_token', token);
+  }
+  
+  // Add a method to get the current user synchronously
+  getCurrentUser(): User | null {
+    return this.userSubject.value;
   }
 }

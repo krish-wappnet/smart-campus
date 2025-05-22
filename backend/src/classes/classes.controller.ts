@@ -8,16 +8,19 @@ import {
   Put,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { ClassesService } from './classes.service';
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
+import { EnrollStudentDto } from './dto/enroll-student.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../users/entities/user.entity';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { Class } from './entities/class.entity';
+import { Enrollment } from './entities/enrollment.entity';
 
 @ApiTags('classes')
 @ApiBearerAuth()
@@ -38,7 +41,7 @@ export class ClassesController {
   }
 
   @Get()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN,Role.STUDENT)
   @ApiOperation({ summary: 'Get all classes' })
   @ApiResponse({ status: 200, description: 'Return all classes', type: [Class] })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -65,6 +68,51 @@ export class ClassesController {
   @ApiResponse({ status: 403, description: 'Forbidden - Requires student role' })
   findStudentClasses(@Request() req): Promise<Class[]> {
     return this.classesService.findStudentClasses(req.user.id);
+  }
+
+  @Post('enroll')
+  @Roles(Role.STUDENT, Role.ADMIN)
+  @ApiOperation({ summary: 'Enroll a student in a class' })
+  @ApiResponse({ 
+    status: HttpStatus.CREATED, 
+    description: 'Successfully enrolled student in the class',
+    type: Enrollment
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Class not found' })
+  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Student is already enrolled in this class' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden - Requires student or admin role' })
+  async enroll(
+    @Request() req,
+    @Body() enrollDto: EnrollStudentDto,
+  ): Promise<Enrollment> {
+    // If admin is enrolling a student, the DTO should contain studentId
+    // If student is self-enrolling, the DTO doesn't need studentId
+    const studentId = enrollDto.studentId || req.user.id;
+    return this.classesService.enrollStudent(studentId, enrollDto);
+  }
+
+  @Delete('enroll/:classId')
+  @Roles(Role.STUDENT, Role.ADMIN)
+  @ApiOperation({ summary: 'Unenroll a student from a class' })
+  @ApiParam({ name: 'classId', description: 'ID of the class to unenroll from' })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Successfully unenrolled student from the class'
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Enrollment not found' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden - Requires student or admin role' })
+  async unenroll(
+    @Request() req,
+    @Param('classId') classId: string,
+    @Body('studentId') studentId?: string, // Optional, for admin unenrolling a student
+  ): Promise<void> {
+    // If admin is unenrolling a student, the studentId should be provided in the body
+    // If student is unenrolling themselves, use their own ID
+    const targetStudentId = studentId || req.user.id;
+    return this.classesService.unenrollStudent(targetStudentId, classId);
   }
 
   @Put(':id')

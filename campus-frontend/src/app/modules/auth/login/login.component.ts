@@ -224,8 +224,11 @@ export class LoginComponent implements OnInit {
             token: response.accessToken
           }));
 
-          // Navigate to admin dashboard
-          this.router.navigate(['/admin']);
+          // Navigate based on user role
+          const redirectPath = response.user.role === 'admin' ? '/admin' : 
+                             response.user.role === 'faculty' ? '/faculty' : 
+                             response.user.role === 'student' ? '/student' : '/login';
+          this.router.navigate([redirectPath]);
         },
         error: (error: any) => {
           this.snackBar.open('Login failed: ' + error.error?.message || 'An error occurred', 'Close', {

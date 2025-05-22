@@ -1,9 +1,11 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Class } from './entities/class.entity';
+import { Enrollment } from './entities/enrollment.entity';
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
+import { EnrollStudentDto } from './dto/enroll-student.dto';
 import { UsersService } from '../users/users.service';
 import { RoomsService } from '../rooms/rooms.service';
 import { TimeslotsService } from '../timeslots/timeslots.service';
@@ -16,6 +18,8 @@ export class ClassesService {
   constructor(
     @InjectRepository(Class)
     private readonly classesRepository: Repository<Class>,
+    @InjectRepository(Enrollment)
+    private readonly enrollmentRepository: Repository<Enrollment>,
     private readonly usersService: UsersService,
     private readonly roomsService: RoomsService,
     private readonly timeslotsService: TimeslotsService,
@@ -77,11 +81,75 @@ export class ClassesService {
   }
 
   async findStudentClasses(studentId: string): Promise<Class[]> {
-    // In a real application, this would query a student-class enrollment table
-    // For this example, we'll return all classes (simplified)
-    return this.classesRepository.find({
-      relations: ['faculty', 'room', 'timeslot'],
+    const enrollments = await this.enrollmentRepository.find({
+      where: { studentId },
+      relations: ['class'],
     });
+    
+    // Resolve all class promises in parallel
+    const classes = await Promise.all(enrollments.map(async (enrollment) => {
+      const cls = await enrollment.class;
+      // Load additional relations if needed
+      await cls.faculty;
+      await cls.room;
+      await cls.timeslot;
+      return cls;
+    }));
+    
+    return classes;
+  }
+
+  async enrollStudent(studentId: string, enrollDto: EnrollStudentDto): Promise<Enrollment> {
+    // If studentId is provided in the DTO, use it (for admin enrolling a student)
+    // Otherwise, use the authenticated student's ID
+    const targetStudentId = enrollDto.studentId || studentId;
+    
+    // Check if the student exists and is actually a student
+    const student = await this.usersService.findOne(targetStudentId);
+    if (student.role !== Role.STUDENT) {
+      throw new BadRequestException('User is not a student');
+    }
+
+    // Check if the class exists
+    const classToEnroll = await this.classesRepository.findOne({
+      where: { id: enrollDto.classId },
+    });
+    
+    if (!classToEnroll) {
+      throw new NotFoundException('Class not found');
+    }
+
+    // Check if already enrolled
+    const existingEnrollment = await this.enrollmentRepository.findOne({
+      where: {
+        studentId: targetStudentId,
+        classId: enrollDto.classId,
+      },
+    });
+
+    if (existingEnrollment) {
+      throw new BadRequestException('Student is already enrolled in this class');
+    }
+
+    // Create enrollment
+    const enrollment = this.enrollmentRepository.create({
+      studentId: targetStudentId,
+      classId: enrollDto.classId,
+    });
+
+    return this.enrollmentRepository.save(enrollment);
+  }
+
+  async unenrollStudent(studentId: string, classId: string): Promise<void> {
+    const enrollment = await this.enrollmentRepository.findOne({
+      where: { studentId, classId },
+    });
+
+    if (!enrollment) {
+      throw new NotFoundException('Enrollment not found');
+    }
+
+    await this.enrollmentRepository.remove(enrollment);
   }
 
   async update(id: string, updateClassDto: UpdateClassDto): Promise<Class> {
@@ -133,11 +201,15 @@ export class ClassesService {
   }
 
   async remove(id: string): Promise<void> {
+    // First delete all enrollments for this class
+    await this.enrollmentRepository.delete({ classId: id });
+    
+    // Then delete the class
     const result = await this.classesRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Class with ID ${id} not found`);
     }
-    this.logger.log(`Deleted class: ${id}`);
+    this.logger.log(`Deleted class with ID: ${id}`);
   }
 
   private async checkConflicts(

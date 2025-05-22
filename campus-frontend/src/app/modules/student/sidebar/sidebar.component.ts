@@ -10,7 +10,8 @@ import {
   faCalendarAlt, 
   faUser,
   faSignOutAlt,
-  faBars
+  faBars,
+  faChalkboardTeacher
 } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -32,6 +33,7 @@ export class StudentSidebarComponent implements OnInit {
   faUser = faUser;
   faSignOutAlt = faSignOutAlt;
   faBars = faBars;
+  faChalkboardTeacher = faChalkboardTeacher;
   
   isMobileMenuOpen = false;
 

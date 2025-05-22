@@ -4,7 +4,8 @@ import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { environment } from '@environments/environment';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpHandlerFn, HttpRequest } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
@@ -23,7 +24,22 @@ export const appConfig: ApplicationConfig = {
       logOnly: false
     }),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(),
+    provideHttpClient(
+      withInterceptors([
+        (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
+          const authToken = localStorage.getItem('auth_token');
+          if (authToken) {
+            const authReq = req.clone({
+              setHeaders: {
+                Authorization: `Bearer ${authToken}`
+              }
+            });
+            return next(authReq);
+          }
+          return next(req);
+        }
+      ])
+    ),
     {
       provide: 'environment',
       useValue: environment
