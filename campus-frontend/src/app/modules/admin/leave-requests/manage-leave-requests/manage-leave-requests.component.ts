@@ -101,7 +101,11 @@ import { UpdateLeaveDialogComponent } from '../update-leave-dialog/update-leave-
   `,
   styles: [`
     .container {
-      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     h2 {

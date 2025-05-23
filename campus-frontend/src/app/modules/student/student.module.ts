@@ -14,14 +14,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { studentRoutes } from './student.routes';
 import { ClassEnrollmentComponent } from './class-enrollment/class-enrollment.component';
 import { QrCodeDialogComponent } from './class-enrollment/qr-code-dialog.component';
-import { TimetableComponent } from './timetable/timetable.component';
 import { AttendanceModule } from './attendance/attendance.module';
 
 @NgModule({
   declarations: [
     ClassEnrollmentComponent,
     QrCodeDialogComponent,
-    TimetableComponent
+
   ],
   imports: [
     CommonModule,

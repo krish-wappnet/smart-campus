@@ -10,6 +10,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatChipsModule } from '@angular/material/chips';
 
 @NgModule({
   declarations: [AdminComponent],
@@ -21,7 +22,8 @@ import { MatMenuModule } from '@angular/material/menu';
     MatListModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule
+    MatMenuModule,
+    MatChipsModule
   ],
   providers: [AuthGuard]
 })

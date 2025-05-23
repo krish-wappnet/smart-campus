@@ -21,6 +21,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatCommonModule } from '@angular/material/core';
 
 import { ApiService } from '@services/api.service';
 import { Class } from '../class.interface';
@@ -69,6 +70,7 @@ export class ConfirmDialogComponent {
     RouterModule,
     ReactiveFormsModule,
     FormsModule,
+    MatCommonModule,
     
     // Material Modules
     MatTableModule,
@@ -82,11 +84,11 @@ export class ConfirmDialogComponent {
     MatFormFieldModule,
     MatInputModule,
     MatMenuModule,
-    MatChipsModule,
     MatSnackBarModule,
     MatCardModule,
     MatSelectModule,
     MatProgressBarModule,
+    MatChipsModule,
     
     // Shared Components
     AddClassComponent,
@@ -96,108 +98,152 @@ export class ConfirmDialogComponent {
     <div class="manage-classes">
       <!-- Page Header -->
       <div class="admin-page__header">
-        <h1 class="admin-page__header-title">Manage Classes</h1>
-        <div class="admin-page__header-actions">
-          <button mat-raised-button color="primary" (click)="openAddClassDialog()">
-            <mat-icon>add</mat-icon>
-            <span class="button-text">Add Class</span>
-          </button>
+        <div class="header-content">
+          <div class="header-title"></div>
+          <!-- Search and Filters -->
+          <div class="search-container">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search Classes</mat-label>
+              <input matInput
+                    #searchInput
+                    type="text"
+                    placeholder="Search by name, code, or instructor..."
+                    (keyup)="applyFilter(searchInput.value)"
+                    [disabled]="isLoading">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="openAddClassDialog()">
+              <mat-icon>add</mat-icon>
+              <span class="button-text">Add Class</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Main Content -->
       <div class="admin-page__content">
-        <!-- Search and Filters -->
-        <div class="search-container">
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-label>Search Classes</mat-label>
-            <input matInput 
-                  #searchInput
-                  type="text"
-                  placeholder="Search by name, code, or instructor..." 
-                  (keyup)="applyFilter(searchInput.value)"
-                  [disabled]="isLoading">
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
-        </div>
-        
-        <!-- Loading State -->
-        <div *ngIf="isLoading" class="loading-spinner">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Loading classes...</p>
-        </div>
-        
-        <!-- No Results -->
-        <div *ngIf="!isLoading && dataSource.filteredData.length === 0" class="no-results">
-          <mat-icon>search_off</mat-icon>
-          <p>No classes found. Try adjusting your search or add a new class.</p>
-          <button mat-stroked-button color="primary" (click)="openAddClassDialog()">
-            <mat-icon>add</mat-icon>
-            <span>Add New Class</span>
-          </button>
-        </div>
-        <!-- Class Table -->
-        <div class="table-responsive" *ngIf="!isLoading && dataSource.filteredData.length > 0">
-          <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-1">
-            <!-- Name Column -->
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Class Name</th>
-              <td mat-cell *matCellDef="let classItem">
-                <div class="class-name">
-                  <mat-icon class="class-icon" [ngStyle]="{'background-color': classItem.color + '20', 'color': classItem.color}">
-                    class_
-                  </mat-icon>
-                  <div>
-                    <div class="class-title">{{classItem.name}}</div>
-                    <div class="class-subtitle">{{classItem.code}}</div>
+        <div class="content-card">
+          <!-- Table Toolbar (Search and Actions) -->
+          <div class="table-toolbar">
+            <div class="table-actions">
+              <!-- Optional: Add filter/export buttons here if needed -->
+              <!-- <button mat-stroked-button><mat-icon>filter_list</mat-icon>Filter</button> -->
+              <button mat-stroked-button (click)="exportToExcel()" matTooltip="Export to Excel">
+                <mat-icon>file_download</mat-icon>
+                Export
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="isLoading" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Loading classes...</p>
+          </div>
+
+          <!-- No Results -->
+          <div *ngIf="!isLoading && dataSource.filteredData.length === 0" class="no-results">
+            <mat-icon>search_off</mat-icon>
+            <p>No classes found. Try adjusting your search or add a new class.</p>
+            <button mat-stroked-button color="primary" (click)="openAddClassDialog()">
+              <mat-icon>add</mat-icon>
+              <span>Add New Class</span>
+            </button>
+          </div>
+
+          <!-- Class Table -->
+          <div class="table-responsive" *ngIf="!isLoading && dataSource.filteredData.length > 0">
+            <table mat-table [dataSource]="dataSource" matSort>
+
+              <!-- Name Column -->
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Class Name</th>
+                <td mat-cell *matCellDef="let classItem">
+                  <div class="class-info">
+                    <div class="class-icon" [ngStyle]="{'background-color': classItem.color + '20', 'color': classItem.color}">
+                       <mat-icon>class_</mat-icon>
+                    </div>
+                    <div>
+                      <div class="class-name">{{classItem.name}}</div>
+                      <div class="class-id">{{classItem.code}}</div>
+                    </div>
                   </div>
-                </div>
-              </td>
-            </ng-container>
+                </td>
+              </ng-container>
 
-            <!-- Instructor Column -->
-            <ng-container matColumnDef="instructor">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Instructor</th>
-              <td mat-cell *matCellDef="let classItem">
-                <div class="instructor-info">
-                  <mat-icon>person</mat-icon>
-                  <span>{{classItem.instructor || 'Not assigned'}}</span>
-                </div>
-              </td>
-            </ng-container>
-
-            <!-- Schedule Column -->
-            <ng-container matColumnDef="schedule">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Schedule</th>
-              <td mat-cell *matCellDef="let classItem">
-                <div *ngIf="classItem.timeslot" class="timeslot-info">
-                  <div class="day">
-                    <mat-icon>event</mat-icon>
-                    {{ classItem.timeslot.dayOfWeek ? (classItem.timeslot.dayOfWeek | titlecase) : 'No day set' }}
+              <!-- Instructor Column -->
+              <ng-container matColumnDef="instructor">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Instructor</th>
+                <td mat-cell *matCellDef="let classItem">
+                  <div class="faculty-info">
+                     <mat-icon>person</mat-icon>
+                     <span>{{classItem.instructor || 'Not assigned'}}</span>
                   </div>
-                  <div class="time" *ngIf="classItem.timeslot.startTime && classItem.timeslot.endTime">
-                    <mat-icon>schedule</mat-icon>
-                    {{ classItem.timeslot.startTime }} - {{ classItem.timeslot.endTime }}
+                </td>
+              </ng-container>
+
+              <!-- Schedule Column -->
+              <ng-container matColumnDef="schedule">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Schedule</th>
+                <td mat-cell *matCellDef="let classItem">
+                  <div *ngIf="classItem.timeslot" class="schedule-info">
+                    <div class="schedule-day">
+                      <mat-icon>event</mat-icon>
+                      {{ classItem.timeslot.dayOfWeek ? (classItem.timeslot.dayOfWeek | titlecase) : 'No day set' }}
+                    </div>
+                    <div class="schedule-time" *ngIf="classItem.timeslot.startTime && classItem.timeslot.endTime">
+                      <mat-icon>schedule</mat-icon>
+                      {{ classItem.timeslot.startTime }} - {{ classItem.timeslot.endTime }}
+                    </div>
                   </div>
-                </div>
-                <div *ngIf="!classItem.timeslot">Not scheduled</div>
-              </td>
-            </ng-container>
+                  <div *ngIf="!classItem.timeslot">Not scheduled</div>
+                </td>
+              </ng-container>
 
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                <td mat-cell *matCellDef="let classItem">
+                  <div class="status-container">
+                    <mat-chip
+                      [color]="classItem.isActive ? 'primary' : 'warn'"
+                      class="status-chip"
+                    >
+                      {{ classItem.isActive ? 'Active' : 'Inactive' }}
+                    </mat-chip>
+                    <mat-chip
+                      [color]="getLectureStatusColor(classItem.lectureStatus)"
+                      class="status-chip"
+                    >
+                      {{ classItem.lectureStatus | titlecase }}
+                    </mat-chip>
+                  </div>
+                </td>
+              </ng-container>
 
+              <!-- Students Column -->
+              <ng-container matColumnDef="students">
+                <th mat-header-cell *matHeaderCellDef>Students</th>
+                <td mat-cell *matCellDef="let classItem">
+                  <div class="students-info">
+                    <mat-icon class="students-icon">people</mat-icon>
+                    <span class="students-count">{{ classItem.__enrollments__?.length || 0 }} enrolled</span>
+                  </div>
+                </td>
+              </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </div>
 
-        <mat-paginator
-          [pageSizeOptions]="[5, 10, 25, 100]"
-          showFirstLastButtons
-        ></mat-paginator>
+          <mat-paginator
+            [pageSizeOptions]="[5, 10, 25, 100]"
+            showFirstLastButtons
+          ></mat-paginator>
 
-        <div *ngIf="isLoading" class="loading-spinner">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Loading classes...</p>
         </div>
       </div>
     </div>
@@ -287,8 +333,6 @@ export class ConfirmDialogComponent {
       padding-right: 16px;
     }
 
-
-    
     /* Ensure table container has proper width */
     .table-container {
       overflow-x: auto;
@@ -386,7 +430,7 @@ export class ManageClassesComponent implements OnInit, AfterViewInit {
   selectedRow: Class | null = null;
 
   // Table configuration
-  displayedColumns: string[] = ['name', 'instructor', 'schedule', 'capacity', 'status', 'actions'];
+  displayedColumns: string[] = ['name', 'instructor', 'schedule', 'status', 'students'];
   dataSource = new MatTableDataSource<Class>([]);
 
   // Page title for the layout
@@ -739,5 +783,22 @@ export class ManageClassesComponent implements OnInit, AfterViewInit {
       this.selectedStatus = [];
       this.dataSource.filter = '';
     }
+  }
+
+  getLectureStatusColor(status: string): string {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'accent';
+      case 'ongoing':
+        return 'primary';
+      case 'scheduled':
+        return 'warn';
+      default:
+        return 'primary';
+    }
+  }
+
+  exportToExcel() {
+    // Implementation of exportToExcel method
   }
 }

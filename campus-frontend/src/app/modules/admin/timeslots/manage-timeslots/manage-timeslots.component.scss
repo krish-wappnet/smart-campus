@@ -18,9 +18,11 @@
   --gray-800: #343a40;
   --dark: #212529;
   --border-radius: 8px;
-  padding: 2rem;
+  padding: 16px;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 
   .page-header {
     display: flex;

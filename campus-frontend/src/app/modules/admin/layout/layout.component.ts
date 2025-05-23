@@ -4,6 +4,8 @@ import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -15,19 +17,29 @@ import { filter } from 'rxjs/operators';
     RouterOutlet,
     SidebarComponent,
     FontAwesomeModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatButtonModule,
+    MatIconModule
   ],
   template: `
     <div class="admin-layout">
       <!-- Sidebar -->
-      <app-sidebar class="sidebar"></app-sidebar>
+      <app-sidebar class="sidebar" [class.open]="isSidebarOpen"></app-sidebar>
+      
+      <!-- Sidebar Overlay -->
+      <div class="sidebar-overlay" [class.visible]="isSidebarOpen" (click)="toggleSidebar()"></div>
       
       <!-- Main Content -->
       <div class="main-content">
         <!-- Top Bar -->
         <header class="top-bar">
           <div class="top-bar-content">
-            <h1 class="page-title">{{ pageTitle }}</h1>
+            <div class="left-section">
+              <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+                <mat-icon>menu</mat-icon>
+              </button>
+              <h1 class="page-title">{{ pageTitle }}</h1>
+            </div>
             <div class="top-bar-actions">
               <!-- Add global actions here if needed -->
             </div>
@@ -62,6 +74,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   loading = false;
   pageTitle = 'Dashboard';
   currentYear = new Date().getFullYear();
+  isSidebarOpen = false;
   
   private routerEventsSub: Subscription | null = null;
   
@@ -73,6 +86,10 @@ export class LayoutComponent implements OnInit, OnDestroy {
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.updatePageTitle();
+      // Close sidebar on mobile when navigating
+      if (window.innerWidth < 960) {
+        this.isSidebarOpen = false;
+      }
     });
   }
   
@@ -80,6 +97,10 @@ export class LayoutComponent implements OnInit, OnDestroy {
     if (this.routerEventsSub) {
       this.routerEventsSub.unsubscribe();
     }
+  }
+  
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
   
   onActivate(component: any) {

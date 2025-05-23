@@ -326,9 +326,11 @@ interface User {
     
     /* Layout */
     .manage-users-container {
-      padding: 24px;
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
+      padding: 16px;
+      width: 100%;
+      box-sizing: border-box;
     }
     
     /* Header */

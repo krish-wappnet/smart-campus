@@ -1,166 +1,460 @@
-@use '../../../admin/shared/admin-styles' as admin;
+@use '../../shared/admin-styles' as admin;
 
 .manage-classes {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   height: 100%;
   background-color: var(--admin-background);
-  padding: var(--admin-spacing-md);
   
-  .search-container {
-    margin-bottom: var(--admin-spacing-md);
+  .admin-page__header {
+    margin-bottom: 24px;
     
-    .search-field {
-      width: 100%;
-      max-width: 400px;
-    }
-  }
-  
-  .mat-table {
-    width: 100%;
-    background: var(--admin-card);
-    border-radius: var(--admin-border-radius);
-    overflow: hidden;
-    box-shadow: var(--admin-shadow-sm);
-    
-    .mat-header-row {
-      background-color: var(--admin-background);
-    }
-    
-    .mat-row {
-      transition: background-color 0.2s ease;
-      
-      &:hover {
-        background-color: var(--admin-hover);
+    .header-content {
+      background: var(--admin-card);
+      border-radius: 8px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+
+      .header-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--admin-text-primary);
+        margin: 0;
       }
-      
-      &.selected {
-        background-color: var(--admin-selected);
-      }
-    }
-    
-    .mat-cell, .mat-header-cell {
-      padding: var(--admin-spacing-md);
-      
-      &:first-child {
-        padding-left: var(--admin-spacing-lg);
-      }
-      
-      &:last-child {
-        padding-right: var(--admin-spacing-lg);
-      }
-    }
-    
-    .mat-column-actions {
-      text-align: right;
-      white-space: nowrap;
-      
-      button {
-        margin-left: var(--admin-spacing-xs);
+
+      .search-container {
+        flex-grow: 1;
+        min-width: 250px;
+        max-width: 400px;
         
-        .mat-icon {
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-          line-height: 20px;
+        .mat-mdc-form-field {
+          width: 100%;
+          margin: 0;
+          font-size: 13px;
+          
+          .mdc-text-field {
+            background-color: var(--admin-background);
+            border-radius: 20px;
+            padding: 0 12px;
+            height: 40px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            
+            &:hover, &.mdc-text-field--focused {
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+            
+            .mdc-notched-outline {
+              display: none;
+            }
+            
+            .mat-mdc-form-field-infix {
+              padding: 4px 0;
+              min-height: 32px;
+              width: auto;
+            }
+            
+            .mat-mdc-form-field-flex {
+              height: 100%;
+              padding: 0;
+              align-items: center;
+            }
+            
+            .mat-mdc-form-field-icon-suffix {
+              padding: 0;
+              margin-left: 4px;
+              opacity: 0.7;
+              transition: opacity 0.2s ease;
+              
+              &:hover {
+                opacity: 1;
+              }
+              
+              button {
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                
+                mat-icon {
+                  font-size: 18px;
+                  width: 18px;
+                  height: 18px;
+                  color: var(--admin-primary);
+                }
+              }
+            }
+            
+            input {
+              padding: 4px 0;
+              font-size: 13px;
+              color: var(--admin-text-primary);
+              caret-color: var(--admin-primary);
+              background-color: transparent;
+              
+              &::placeholder {
+                color: var(--admin-text-secondary);
+                opacity: 1;
+                transition: opacity 0.2s ease;
+              }
+              
+              &:focus::placeholder {
+                opacity: 0.7;
+              }
+            }
+          }
+        }
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+
+        .add-button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 500;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          border-radius: 4px;
+          padding: 0 16px;
+          height: 42px;
+          
+          mat-icon {
+            margin-right: 4px;
+          }
         }
       }
     }
   }
   
-  .mat-paginator {
-    background: var(--admin-card);
-    border-top: 1px solid var(--admin-divider);
-    border-radius: 0 0 var(--admin-border-radius) var(--admin-border-radius);
-  }
-  
-  .no-results {
-    padding: var(--admin-spacing-lg);
-    text-align: center;
-    color: var(--admin-text-secondary);
-    background: var(--admin-card);
-    border-radius: var(--admin-border-radius);
-    margin-top: var(--admin-spacing-md);
-    
-    mat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      margin-bottom: var(--admin-spacing-md);
-      color: var(--admin-text-secondary);
-      opacity: 0.7;
-    }
-    
-    p {
-      margin-bottom: var(--admin-spacing-md);
-      font-size: 1.1rem;
-    }
-    
-    button {
-      margin-top: var(--admin-spacing-sm);
-    }
-  }
-  
-  .loading-spinner {
+  .admin-page__content {
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--admin-spacing-xl) 0;
+
+    .content-card {
+      background: var(--admin-card);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
     
-    p {
-      margin-top: var(--admin-spacing-md);
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--admin-divider);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    
+    .table-actions {
+      display: flex;
+      gap: 8px;
+      
+      button {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+    
+    .table-responsive {
+      overflow-x: auto;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        
+        th.mat-header-cell {
+          font-weight: 500;
+          color: var(--admin-text-secondary);
+          font-size: 13px;
+          padding: 10px 16px;
+          border-bottom: 1px solid var(--admin-divider);
+          white-space: nowrap;
+          border-right: 1px solid var(--admin-divider);
+          
+          &:last-child {
+            border-right: none;
+          }
+        }
+        
+        td.mat-cell {
+          padding: 12px 16px;
+          border-bottom: 1px solid var(--admin-divider);
+          vertical-align: middle;
+          border-right: 1px solid var(--admin-divider);
+          
+          &:last-child {
+            border-right: none;
+          }
+        }
+        
+        tr.mat-row {
+          transition: background-color 0.2s ease;
+          
+          &:hover {
+            background-color: var(--admin-hover);
+          }
+        }
+      }
+    }
+    
+    .actions-cell {
+      white-space: nowrap;
+      text-align: right;
+      
+      .action-buttons {
+        display: flex;
+        gap: 2px;
+        
+        button {
+          width: 32px;
+          height: 32px;
+          line-height: 32px;
+          
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+    
+    mat-paginator {
+      border-top: 1px solid var(--admin-divider);
+      background: transparent;
+      
+      ::ng-deep .mat-mdc-paginator-container {
+        padding: 8px 16px;
+        min-height: 56px;
+      }
+      
+      ::ng-deep .mat-mdc-paginator-page-size {
+        margin-right: 0;
+      }
+    }
+    
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      gap: 16px;
+      flex-grow: 1;
+      
+      p {
+        color: var(--admin-text-secondary);
+      }
+    }
+
+    .no-results {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      gap: 16px;
+      flex-grow: 1;
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: var(--admin-text-secondary);
+        opacity: 0.7;
+      }
+
+      p {
+        color: var(--admin-text-secondary);
+        font-size: 1.1rem;
+        text-align: center;
+      }
+    }
+  }
+  
+  .class-info, .faculty-info, .room-info, .schedule-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .class-icon, .faculty-icon, .room-icon, .schedule-icon {
+      color: var(--admin-primary);
+      background: rgba(63, 81, 181, 0.1);
+      border-radius: 50%;
+      padding: 8px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    .class-name, .faculty-name, .room-name, .schedule-day {
+      font-weight: 500;
+      color: var(--admin-text-primary);
+      font-size: 13px;
+    }
+    
+    .class-id, .faculty-email, .room-capacity, .schedule-time {
+      font-size: 12px;
+      color: var(--admin-text-secondary);
+      margin-top: 1px;
+    }
+  }
+  
+  .status-container {
+    display: flex;
+    gap: 8px;
+    
+    .status-chip {
+      font-size: 12px;
+      height: 24px;
+      
+      &.mat-mdc-chip.mat-primary {
+        background-color: var(--admin-primary-light);
+        color: var(--admin-primary-dark);
+      }
+      
+      &.mat-mdc-chip.mat-warn {
+        background-color: var(--admin-warn-light);
+        color: var(--admin-warn-dark);
+      }
+      
+      &.mat-mdc-chip.mat-accent {
+        background-color: var(--admin-accent-light);
+        color: var(--admin-accent-dark);
+      }
+    }
+  }
+  
+  .students-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .students-icon {
+      color: var(--admin-primary);
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+    
+    .students-count {
+      font-size: 13px;
       color: var(--admin-text-secondary);
     }
   }
 }
 
-// Responsive styles
+// Responsive adjustments
 @media (max-width: 959px) {
-  .mat-table {
-    .mat-cell, .mat-header-cell {
-      padding: var(--admin-spacing-sm) var(--admin-spacing-md) !important;
-      
-      &:first-child {
-        padding-left: var(--admin-spacing-md) !important;
-      }
-      
-      &:last-child {
-        padding-right: var(--admin-spacing-md) !important;
-      }
+  .manage-classes {
+    padding: 16px;
+    
+    .admin-page__header .header-content {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .admin-page__header .search-container {
+      min-width: 100%;
+      max-width: 100%;
+    }
+    
+    .admin-page__content .table-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .admin-page__content .table-actions {
+      justify-content: flex-end;
     }
   }
 }
 
 @media (max-width: 599px) {
-  .mat-table {
-    .mat-cell, .mat-header-cell {
-      padding: var(--admin-spacing-xs) var(--admin-spacing-sm) !important;
-      font-size: 0.85rem;
-      
-      &:first-child {
-        padding-left: var(--admin-spacing-sm) !important;
-      }
-      
-      &:last-child {
-        padding-right: var(--admin-spacing-sm) !important;
-      }
+  .manage-classes {
+    padding: 12px;
+    
+    .admin-page__header .header-content {
+      padding: 16px;
     }
     
-    .mat-column-actions {
-      button {
-        min-width: 36px;
-        padding: 0 var(--admin-spacing-xs);
+    .admin-page__content .table-toolbar {
+      padding: 12px 16px;
+    }
+    
+    .admin-page__content .actions-cell {
+      justify-content: flex-end;
+      display: flex;
+      
+      .action-buttons {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      
+      .class-info, .faculty-info, .room-info, .schedule-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
         
-        .mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-          line-height: 18px;
+        .class-icon, .faculty-icon, .room-icon, .schedule-icon {
+          width: 28px;
+          height: 28px;
+          
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
         }
         
-        span {
-          display: none;
+        .class-name, .faculty-name, .room-name, .schedule-day {
+          font-size: 14px;
+        }
+        
+        .class-id, .faculty-email, .room-capacity, .schedule-time {
+          font-size: 11px;
         }
       }
     }
