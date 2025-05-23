@@ -1,0 +1,155 @@
+.qr-scanner-container {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 24px;
+  
+  @media (min-width: 960px) {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.scanner-card {
+  flex: 1;
+  min-width: 0;
+  max-width: 800px;
+  margin: 0 auto;
+  
+  .mat-card-header {
+    margin-bottom: 16px;
+  }
+  
+  .mat-card-title {
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+  
+  .mat-card-subtitle {
+    margin-bottom: 0;
+  }
+}
+
+.scanner-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  
+  .scanner-element {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+  }
+  
+  .scanner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    
+    p {
+      margin-top: 16px;
+      font-size: 1.1rem;
+    }
+  }
+  
+  .camera-selector {
+    margin-top: 16px;
+    
+    mat-form-field {
+      width: 100%;
+    }
+  }
+}
+
+.no-camera,
+.no-permission {
+  text-align: center;
+  padding: 32px 16px;
+  
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+  }
+  
+  h3 {
+    margin: 0 0 8px;
+    font-size: 1.5rem;
+  }
+  
+  p {
+    color: rgba(0, 0, 0, 0.7);
+    margin-bottom: 24px;
+  }
+}
+
+.instructions {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  
+  @media (min-width: 960px) {
+    width: 300px;
+    position: sticky;
+    top: 24px;
+  }
+  
+  h3 {
+    margin-top: 0;
+    color: #3f51b5;
+  }
+  
+  ol, ul {
+    padding-left: 20px;
+    
+    li {
+      margin-bottom: 8px;
+    }
+  }
+  
+  .troubleshooting {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+    
+    h4 {
+      margin: 0 0 12px;
+      color: #f44336;
+    }
+    
+    ul {
+      margin: 0;
+    }
+  }
+}
+
+// Snackbar styles
+::ng-deep {
+  .success-snackbar {
+    background-color: #4caf50 !important;
+    color: white !important;
+  }
+  
+  .error-snackbar {
+    background-color: #f44336 !important;
+    color: white !important;
+  }
+}

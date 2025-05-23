@@ -1,133 +1,176 @@
 <div class="container">
-  <div class="header-section">
-    <h2>Available Classes</h2>
-    <button mat-stroked-button (click)="refreshData()" [disabled]="isLoading">
-      <mat-icon>refresh</mat-icon> Refresh
-    </button>
-  </div>
-  
-  @if (isLoading) {
-    <div class="loading-spinner">
-      <mat-spinner></mat-spinner>
-      <p>Loading classes...</p>
+    <div class="header-section">
+      <div class="header-content">
+        <h2>Available Classes</h2>
+        <div class="header-actions">
+          <button mat-stroked-button (click)="refreshData()" [disabled]="isLoading" class="refresh-btn">
+            <mat-icon>refresh</mat-icon>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
     </div>
-  } @else if (hasError) {
-    <div class="error-message">
-      <mat-icon>error</mat-icon>
-      <p>{{ errorMessage || 'Failed to load classes. Please try again later.' }}</p>
-      <button mat-raised-button color="primary" (click)="loadData()">
-        <mat-icon>refresh</mat-icon> Retry
-      </button>
-    </div>
-  } @else if (classes.length === 0) {
-    <div class="no-classes">
-      <mat-icon>class</mat-icon>
-      <p>No classes available for enrollment at the moment.</p>
-    </div>
-  } @else {
-    <div class="class-grid">
-      @for (classItem of classes; track classItem.id) {
-        <mat-card class="class-card">
-          <mat-card-header>
-            <div class="class-header">
-              <div class="class-title-row">
-                <mat-card-title class="class-name">{{ classItem.name || 'Unnamed Class' }}</mat-card-title>
-                <div class="faculty-info">
-                  <mat-icon class="faculty-icon">person</mat-icon>
-                  <span class="faculty-name">
-                    @if (classItem.faculty?.name) {
-                      {{ classItem.faculty?.name || 'N/A' }}
-                    } @else if (classItem.facultyId) {
-                      Faculty ID: {{ classItem.facultyId || 'N/A' }}
+    
+    @if (isLoading) {
+      <div class="message-container loading-spinner">
+        <mat-spinner></mat-spinner>
+        <p>Loading classes...</p>
+      </div>
+    } @else if (hasError) {
+      <div class="message-container error-message">
+        <mat-icon>error</mat-icon>
+        <p>{{ errorMessage || 'Failed to load classes. Please try again later.' }}</p>
+        <button mat-raised-button color="primary" (click)="loadData()">
+          <mat-icon>refresh</mat-icon> Retry
+        </button>
+      </div>
+    } @else if (classes.length === 0) {
+      <div class="message-container no-classes">
+        <mat-icon>class</mat-icon>
+        <p>No classes available for enrollment at the moment.</p>
+      </div>
+    } @else {
+      <div class="class-grid">
+        @for (classItem of classes; track classItem.id) {
+          <mat-card class="class-card">
+            <mat-card-header>
+              <div class="class-header">
+                <div class="class-title-row">
+                  <mat-card-title class="class-name">{{ classItem.name || 'Unnamed Class' }}</mat-card-title>
+                  <div class="faculty-info">
+                    <mat-icon class="faculty-icon">person</mat-icon>
+                    <span class="faculty-name">
+                      @if (classItem.faculty?.name) {
+                        {{ classItem.faculty?.name || 'N/A' }}
+                      } @else if (classItem.facultyId) {
+                        Faculty ID: {{ classItem.facultyId || 'N/A' }}
+                      } @else {
+                        Faculty not assigned
+                      }
+                    </span>
+                  </div>
+                </div>
+                <div class="status-badges">
+                  @if (isEnrolled(classItem.id)) {
+                    <span class="enrolled-badge">
+                      <mat-icon>check_circle</mat-icon> Enrolled
+                    </span>
+                  }
+                  @if (classItem.isActive) {
+                    <span class="active-badge">
+                      <mat-icon>fiber_manual_record</mat-icon> Active Now
+                    </span>
+                  }
+                </div>
+              </div>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <div class="class-details">
+                <!-- Room Information -->
+                <div class="detail">
+                  <mat-icon>meeting_room</mat-icon>
+                  <span>
+                    @if (classItem.room?.name) {
+                      {{ classItem.room?.name || 'N/A' }}
+                    } @else if (classItem.roomId) {
+                      Room {{ classItem.roomId?.substring(0, 4) || 'N/A' }}
                     } @else {
-                      Faculty not assigned
+                      Room not assigned
+                    }
+                  </span>
+                </div>
+                
+                <!-- Time Information -->
+                <div class="detail">
+                  <mat-icon>schedule</mat-icon>
+                  <span>
+                    @if (classItem.timeslot?.startTime) {
+                      {{ formatTime(classItem.timeslot?.startTime || '') }}
+                      @if (classItem.timeslot?.endTime) {
+                        - {{ formatTime(classItem.timeslot?.endTime || '') }}
+                      }
+                    } @else {
+                      Time not set
+                    }
+                  </span>
+                </div>
+                
+                <!-- Day of Week -->
+                <div class="detail">
+                  <mat-icon>event</mat-icon>
+                  <span>
+                    @if (classItem.timeslot?.dayOfWeek) {
+                      {{ (classItem.timeslot?.dayOfWeek || '') | titlecase }}
+                    } @else {
+                      Day not set
                     }
                   </span>
                 </div>
               </div>
-              @if (isEnrolled(classItem.id)) {
-                <span class="enrolled-badge">
-                  <mat-icon>check_circle</mat-icon> Enrolled
-                </span>
+              
+              @if (classItem.description) {
+                <p class="class-description">{{ classItem.description }}</p>
               }
-            </div>
-          </mat-card-header>
-          
-          <mat-card-content>
-            <div class="class-details">
-              <!-- Room Information -->
-              <div class="detail">
-                <mat-icon>meeting_room</mat-icon>
-                <span>
-                  @if (classItem.room?.name) {
-                    {{ classItem.room?.name || 'N/A' }}
-                  } @else if (classItem.roomId) {
-                    Room {{ classItem.roomId?.substring(0, 4) || 'N/A' }}
-                  } @else {
-                    Room not assigned
-                  }
-                </span>
+            </mat-card-content>
+            
+            <mat-card-actions class="card-actions">
+              <div class="action-buttons">
+                <button 
+                  mat-raised-button 
+                  [color]="isEnrolled(classItem.id) ? 'warn' : 'primary'"
+                  (click)="toggleEnrollment(classItem.id)"
+                  [disabled]="isLoading"
+                  class="enroll-button"
+                >
+                  <mat-icon class="button-icon">{{ isEnrolled(classItem.id) ? 'cancel' : 'add' }}</mat-icon>
+                  <span class="button-text">{{ isEnrolled(classItem.id) ? 'Unenroll' : 'Enroll' }}</span>
+                </button>
+                
+                @if (isEnrolled(classItem.id) && classItem.isActive && classItem.currentQrCode && classItem.lectureStatus !== 'COMPLETED') {
+                  <button 
+                    mat-raised-button
+                    color="accent"
+                    (click)="openQrDialog(classItem.id, classItem.currentQrCode)"
+                    [disabled]="isLoading || attendanceStatus[classItem.id] || isQrCodeExpired(classItem.qrCodeExpiresAt)"
+                    class="attendance-button"
+                  >
+                    <mat-icon class="button-icon">check</mat-icon>
+                    <span class="button-text">Mark Attendance</span>
+                  </button>
+                }
+                @if (classItem.lectureStatus === 'COMPLETED') {
+                  <span class="completed-badge">
+                    <mat-icon>check_circle</mat-icon> Lecture Completed
+                  </span>
+                }
               </div>
               
-              <!-- Time Information -->
-              <div class="detail">
-                <mat-icon>schedule</mat-icon>
-                <span>
-                  @if (classItem.timeslot?.startTime) {
-                    {{ formatTime(classItem.timeslot?.startTime || '') }}
-                    @if (classItem.timeslot?.endTime) {
-                      - {{ formatTime(classItem.timeslot?.endTime || '') }}
-                    }
-                  } @else {
-                    Time not set
-                  }
-                </span>
-              </div>
-              
-              <!-- Day of Week -->
-              <div class="detail">
-                <mat-icon>event</mat-icon>
-                <span>
-                  @if (classItem.timeslot?.dayOfWeek) {
-                    {{ (classItem.timeslot?.dayOfWeek || '') | titlecase }}
-                  } @else {
-                    Day not set
-                  }
-                </span>
-              </div>
-            </div>
-            
-            @if (classItem.description) {
-              <p class="class-description">{{ classItem.description }}</p>
-            }
-          </mat-card-content>
-          
-          <mat-card-actions align="end">
-            <button 
-              mat-raised-button 
-              [color]="isEnrolled(classItem.id) ? 'warn' : 'primary'"
-              (click)="toggleEnrollment(classItem.id)"
-              [disabled]="isLoading"
-              class="enroll-button"
-            >
-              <mat-icon>{{ isEnrolled(classItem.id) ? 'cancel' : 'add' }}</mat-icon>
-              {{ isEnrolled(classItem.id) ? 'Unenroll' : 'Enroll' }}
-            </button>
-            
-            @if (isEnrolled(classItem.id)) {
-              <button 
-                mat-button 
-                color="accent"
-                (click)="markAttendance(classItem.id)"
-                [disabled]="isLoading || attendanceStatus[classItem.id]"
-              >
-                <mat-icon>check_circle</mat-icon>
-                {{ attendanceStatus[classItem.id] ? 'Attendance Marked' : 'Mark Attendance' }}
-              </button>
-            }
-          </mat-card-actions>
-        </mat-card>
-      }
-    </div>
-  }
-</div>
+              @if (isEnrolled(classItem.id) && classItem.isActive) {
+                <div class="attendance-section">
+                  <div class="attendance-row">
+                    <div class="status-indicator">
+                      <mat-icon class="status-icon" [class.recorded]="attendanceStatus[classItem.id]">
+                        {{ attendanceStatus[classItem.id] ? 'check_circle' : 'schedule' }}
+                      </mat-icon>
+                      <span class="status-text">
+                        {{ attendanceStatus[classItem.id] ? 'Attendance Recorded' : 'Attendance Pending' }}
+                      </span>
+                    </div>
+                    <div class="qr-expiry" [class.expired]="isQrCodeExpired(classItem.qrCodeExpiresAt)">
+                      <mat-icon class="qr-icon">
+                        {{ !isQrCodeExpired(classItem.qrCodeExpiresAt) ? 'timer' : 'timer_off' }}
+                      </mat-icon>
+                      <span class="expiry-text">
+                        {{ formatExpiryDate(classItem.qrCodeExpiresAt) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    }
+  </div>

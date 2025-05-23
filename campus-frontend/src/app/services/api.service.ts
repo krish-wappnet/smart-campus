@@ -15,14 +15,16 @@ export class ApiService {
   private apiUrl = environment.apiUrl;
 
 
+  private qrCodeRefreshInterval: any;
+  private currentQrCode: { code: string; expiresAt: Date } | null = null;
+  private isBrowser: boolean = typeof window !== 'undefined';
+
   constructor(
     private http: HttpClient,
     private store: Store<{ auth: any }>
   ) {
     // No need to initialize from localStorage since it's handled by the login component
   }
-
-  private isBrowser: boolean = typeof window !== 'undefined';
 
   private getToken(): string | null {
     return this.isBrowser ? localStorage.getItem('auth_token') : null;
@@ -326,21 +328,6 @@ export class ApiService {
     );
   }
 
-  // Class API methods
-  createClass(classData: any): Observable<any> {
-    const token = this.getToken();
-    if (!token) {
-      return throwError(() => new Error('No authentication token available'));
-    }
-    return this.http.post<any>(`${this.apiUrl}/classes`, classData, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    }).pipe(
-      catchError(error => this.handleError(error, null))
-    );
-  }
-
 
   getClasses(): Observable<any> {
     const token = this.getToken();
@@ -350,6 +337,21 @@ export class ApiService {
     return this.http.get<any>(`${this.apiUrl}/classes`, {
       headers: {
         'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      catchError(error => this.handleError(error, null))
+    );
+  }
+
+  createClass(classData: any): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token available'));
+    }
+    return this.http.post<any>(`${this.apiUrl}/classes`, classData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     }).pipe(
       catchError(error => this.handleError(error, null))
@@ -399,13 +401,12 @@ export class ApiService {
     );
   }
 
-  // Student methods
   getStudentProfile(): Observable<any> {
     const token = this.getToken();
     if (!token) {
       return throwError(() => new Error('No authentication token available'));
     }
-    return this.http.get<any>(`${this.apiUrl}/student/profile`, {
+    return this.http.get<any>(`${this.apiUrl}/students/profile`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

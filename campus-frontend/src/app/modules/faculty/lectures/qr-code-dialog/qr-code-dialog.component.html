@@ -1,0 +1,9 @@
+<h2 mat-dialog-title>Attendance QR Code</h2>
+<mat-dialog-content class="text-center">
+  <p>Scan this QR code to mark attendance</p>
+  <img [src]="'data:image/png;base64,' + data.qrCode" alt="QR Code" class="qr-code">
+  <p class="expiry">Expires: {{ formattedExpiry }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

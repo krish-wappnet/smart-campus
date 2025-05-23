@@ -1,0 +1,130 @@
+<div class="qr-dialog" role="dialog" aria-labelledby="qr-dialog-title" [attr.aria-busy]="isMarking">
+  <div class="dialog-header">
+    <h2 mat-dialog-title id="qr-dialog-title">
+      <mat-icon class="header-icon">qr_code_scanner</mat-icon>
+      <span>Mark Attendance</span>
+    </h2>
+    <button 
+      mat-icon-button 
+      (click)="onClose()" 
+      class="close-button" 
+      [disabled]="isMarking"
+      aria-label="Close dialog"
+      matTooltip="Close dialog"
+      matTooltipPosition="below"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <div class="qr-container" [class.loading]="isMarking">
+      <div class="qr-code-wrapper" [class.expired]="isExpired" [class.loading]="isMarking">
+        <div class="qr-code-container" [class.expired]="isExpired">
+          <div *ngIf="data.qrCode; else noQrCode" class="qr-code-image-container">
+            <img 
+              [src]="data.qrCode" 
+              [alt]="'QR Code for ' + (data.className || 'class attendance')"
+              [attr.aria-hidden]="isMarking || imageError"
+              [class.error]="imageError"
+              class="qr-code-image"
+              (load)="onImageLoad($event)"
+              (error)="onImageError($event)"
+              #qrImage
+            />
+            <div *ngIf="imageError" class="image-error">
+              <mat-icon>error_outline</mat-icon>
+              <p>Could not load QR code</p>
+              <button mat-button color="primary" (click)="generateQrCode()">
+                <mat-icon>refresh</mat-icon>
+                Try Again
+              </button>
+            </div>
+            <div *ngIf="!imageError && isGenerating" class="loading-overlay">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Generating QR code...</p>
+            </div>
+          </div>
+          <ng-template #noQrCode>
+            <div class="no-qr">
+              <mat-spinner *ngIf="isGenerating" diameter="40"></mat-spinner>
+              <div *ngIf="!isGenerating">
+                <mat-icon>qr_code_2</mat-icon>
+                <p>No QR code available</p>
+                <button mat-button color="primary" (click)="generateQrCode()">
+                  <mat-icon>refresh</mat-icon>
+                  Generate QR Code
+                </button>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="class-info">
+        <h3>{{ data.className || 'Class' }}</h3>
+        <p *ngIf="data.facultyName">Faculty: {{ data.facultyName }}</p>
+        <p *ngIf="data.room">Room: {{ data.room }}</p>
+        <p *ngIf="data.timeslot">Time: {{ data.timeslot }}</p>
+        
+        <div class="timer" [class.expired]="isExpired">
+          <mat-icon *ngIf="!isExpired">schedule</mat-icon>
+          <mat-icon *ngIf="isExpired">error_outline</mat-icon>
+          <span *ngIf="!isExpired">Expires in {{ timeLeft }}</span>
+          <span *ngIf="isExpired">QR Code Expired</span>
+        </div>
+      </div>
+
+      <div class="instructions" *ngIf="!isExpired && !imageError">
+        <h4>How to mark attendance:</h4>
+        <ol>
+          <li>Open your smartphone's camera</li>
+          <li>Point it at the QR code above</li>
+          <li>Tap the notification to mark your attendance</li>
+        </ol>
+      </div>
+
+      <div class="loading-instructions" *ngIf="isExpired">
+        <p>The QR code has expired. Please ask your faculty to generate a new one.</p>
+      </div>
+
+      <!-- Debug information (visible only in development) -->
+      <div class="debug-info" *ngIf="showDebug">
+        <h4>Debug Information</h4>
+        <p><strong>QR Code Type:</strong> {{ qrCodeType }}</p>
+        <p><strong>Starts with:</strong> {{ qrCodeStart }}</p>
+        <p><strong>Expires At:</strong> {{ data.expiresAt | date:'medium' }}</p>
+        <p><strong>Current Time:</strong> {{ currentTime | date:'medium' }}</p>
+        <p><strong>Time Left:</strong> {{ timeLeft }}</p>
+        <p><strong>Is Expired:</strong> {{ isExpired }}</p>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button 
+      mat-button 
+      (click)="onClose()" 
+      [disabled]="isMarking"
+      aria-label="Cancel and close dialog"
+      [class.hidden]="isMarking"
+    >
+      Cancel
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="markAttendance()"
+      [disabled]="isMarking || isExpired || !data.qrCode"
+      [class.loading]="isMarking"
+      aria-label="Mark my attendance"
+      [attr.aria-busy]="isMarking"
+    >
+      <span class="button-content">
+        <mat-icon *ngIf="!isMarking">check_circle</mat-icon>
+        <span class="button-text">{{ isMarking ? 'Processing...' : 'Mark My Attendance' }}</span>
+        <mat-spinner *ngIf="isMarking" diameter="20" aria-hidden="true"></mat-spinner>
+      </span>
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Attendance, AttendanceStatus } from './entities/attendance.entity';
@@ -16,6 +16,7 @@ export class AttendanceService {
   constructor(
     @InjectRepository(Attendance)
     private readonly attendanceRepository: Repository<Attendance>,
+    @Inject(forwardRef(() => ClassesService))
     private readonly classesService: ClassesService,
     private readonly usersService: UsersService,
   ) {}
@@ -66,7 +67,6 @@ export class AttendanceService {
       throw new NotFoundException('User is not a student');
     }
 
-    // Create attendance record with biometric data
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -142,28 +142,61 @@ export class AttendanceService {
     }));
   }
 
-  async markAttendanceForLecture(classId: string, status: AttendanceStatus): Promise<void> {
-    // In a real application, this would mark attendance for all students enrolled in the class
-    // For this example, we'll use a simplified approach
-    const cls = await this.classesService.findOne(classId);
-    
-    // Get all students (in a real app, you'd get students enrolled in this class)
-    const students = await this.usersService.findAll();
-    const studentUsers = students.filter(user => user.role === Role.STUDENT);
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Create attendance records for all students
-    for (const student of studentUsers) {
-      await this.create({
-        studentId: student.id,
-        classId,
-        date: today,
-        status,
-      });
+  async markAttendance(attendanceData: {
+    studentId: string;
+    classId: string;
+    status: AttendanceStatus;
+    date: Date;
+  }) {
+    const existing = await this.attendanceRepository.findOne({
+      where: {
+        studentId: attendanceData.studentId,
+        classId: attendanceData.classId,
+        date: attendanceData.date,
+      },
+    });
+
+    if (existing) {
+      // Update existing record
+      existing.status = attendanceData.status;
+      return this.attendanceRepository.save(existing);
     }
+
+    // Create new record
+    const attendance = this.attendanceRepository.create({
+      studentId: attendanceData.studentId,
+      classId: attendanceData.classId,
+      status: attendanceData.status,
+      date: attendanceData.date,
+    });
+
+    return this.attendanceRepository.save(attendance);
+  }
+
+  async findByStudentAndDate(studentId: string, classId: string, date: Date) {
+    return this.attendanceRepository.findOne({
+      where: {
+        studentId,
+        classId,
+        date,
+      },
+    });
+  }
+
+  async markAttendanceForLecture(classId: string, status: AttendanceStatus): Promise<void> {
+    const cls = await this.classesService.findOne(classId);
+    const enrollments = await this.classesService.findEnrollmentsByClass(classId);
     
+    const attendancePromises = enrollments.map(enrollment => 
+      this.markAttendance({
+        studentId: enrollment.studentId,
+        classId,
+        status,
+        date: new Date()
+      })
+    );
+    
+    await Promise.all(attendancePromises);
     this.logger.log(`Marked ${status} attendance for all students in class ${classId}`);
   }
 }

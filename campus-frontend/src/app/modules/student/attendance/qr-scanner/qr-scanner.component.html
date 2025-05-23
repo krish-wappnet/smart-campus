@@ -1,0 +1,78 @@
+<div class="qr-scanner-container">
+  <mat-card class="scanner-card">
+    <mat-card-header>
+      <mat-card-title>Scan QR Code</mat-card-title>
+      <mat-card-subtitle>Position the QR code within the frame to mark your attendance</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="scanner-wrapper" *ngIf="hasDevices">
+        <zxing-scanner
+          [enable]="scannerEnabled"
+          [device]="selectedDevice"
+          (scanSuccess)="onScanSuccess($event)"
+          (camerasFound)="onCamerasFound($event)"
+          (permissionResponse)="onHasPermission($event)"
+          [autofocusEnabled]="true"
+          [cssClass]="'scanner-element'"
+          [formats]="['QR_CODE']">
+        </zxing-scanner>
+        
+        <div class="scanner-overlay" *ngIf="loading">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Processing attendance...</p>
+        </div>
+        
+        <div class="camera-selector" *ngIf="availableDevices.length > 1">
+          <mat-form-field appearance="outline">
+            <mat-label>Select Camera</mat-label>
+            <mat-select (selectionChange)="onDeviceSelectChange($event.value)" [value]="selectedDevice?.deviceId">
+              <mat-option *ngFor="let device of availableDevices" [value]="device.deviceId">
+                {{ device.label || 'Camera ' + (availableDevices.indexOf(device) + 1) }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      
+      <div class="no-camera" *ngIf="!hasDevices">
+        <mat-icon class="camera-icon">no_photography</mat-icon>
+        <h3>No camera available</h3>
+        <p>Please connect a camera to scan QR codes.</p>
+      </div>
+      
+      <div class="no-permission" *ngIf="!hasPermission && hasDevices">
+        <mat-icon class="permission-icon">camera_off</mat-icon>
+        <h3>Camera access denied</h3>
+        <p>Please allow camera access in your browser settings to scan QR codes.</p>
+        <button mat-raised-button color="primary" (click)="scannerEnabled = !scannerEnabled">
+          Try Again
+        </button>
+      </div>
+    </mat-card-content>
+    
+    <mat-card-actions>
+      <button mat-button routerLink="/student/dashboard">
+        <mat-icon>arrow_back</mat-icon> Back to Dashboard
+      </button>
+    </mat-card-actions>
+  </mat-card>
+  
+  <div class="instructions">
+    <h3>How to mark attendance:</h3>
+    <ol>
+      <li>Ask your faculty to display the QR code for the class</li>
+      <li>Position the QR code within the frame above</li>
+      <li>Hold still until the attendance is confirmed</li>
+    </ol>
+    
+    <div class="troubleshooting">
+      <h4>Having trouble?</h4>
+      <ul>
+        <li>Ensure good lighting</li>
+        <li>Keep the QR code steady and centered</li>
+        <li>Move closer if the QR code is too small</li>
+      </ul>
+    </div>
+  </div>
+</div>

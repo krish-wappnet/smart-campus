@@ -1,38 +1,59 @@
 <div class="lectures-container">
-  <h2>My Lectures</h2>
-
-  <div *ngIf="loading" class="loading-spinner">
-    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  <div class="header">
+    <h1>My Lectures</h1>
   </div>
 
-  <div *ngIf="error" class="error-message">
-    {{error}}
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div class="error-container" *ngIf="error">
+    <mat-icon class="error-icon">error</mat-icon>
+    <p>{{ error }}</p>
   </div>
 
   <div class="classes-grid" *ngIf="!loading && !error">
-    <mat-card class="class-card" *ngFor="let class of classes">
+    <mat-card class="class-card" *ngFor="let cls of classes">
       <mat-card-header>
-        <mat-card-title>{{class?.name || 'N/A'}}</mat-card-title>
-        <mat-card-subtitle>
-          {{class?.timeslot?.startTime || 'N/A'}} - {{class?.timeslot?.endTime || 'N/A'}}
-          <br>
-          Room: {{class?.room?.name || 'N/A'}} (Capacity: {{class?.room?.capacity || 'N/A'}})
-        </mat-card-subtitle>
+        <mat-card-title>{{ cls.name }}</mat-card-title>
+        <mat-card-subtitle>{{ cls.courseCode }}</mat-card-subtitle>
       </mat-card-header>
-      
+
       <mat-card-content>
-        <span class="faculty">Faculty: {{class?.faculty?.name || 'N/A'}}</span>
-        <p>Day: {{class?.timeslot?.dayOfWeek || 'N/A'}}</p>
+        <div class="class-info">
+          <p><strong>Room:</strong> {{ cls.room.name }}</p>
+          <p><strong>Time:</strong> {{ cls.timeslot.startTime }} - {{ cls.timeslot.endTime }}</p>
+          <p><strong>Day:</strong> {{ cls.timeslot.dayOfWeek }}</p>
+          <p><strong>Enrolled Students:</strong> {{ cls.__enrollments__.length }}</p>
+        </div>
+
+        <div class="lecture-status" *ngIf="cls.lectureStatus === 'IN_PROGRESS'">
+          <mat-progress-bar
+            mode="determinate"
+            [value]="getTimeRemainingPercentage(cls.qrCodeExpiresAt)"
+            color="primary">
+          </mat-progress-bar>
+          <p class="status-text">Lecture in progress</p>
+        </div>
       </mat-card-content>
 
       <mat-card-actions>
-        <button mat-raised-button color="primary" (click)="startLecture(class.id)" [disabled]="class.lectureStatus === 'active'">
-          <mat-icon>play_arrow</mat-icon>
+        <button mat-button
+                color="primary"
+                *ngIf="cls.lectureStatus === 'NOT_STARTED'"
+                (click)="startLecture(cls.id)">
           Start Lecture
         </button>
-        <button mat-raised-button color="warn" (click)="endLecture(class.id)" [disabled]="class.lectureStatus !== 'active'">
-          <mat-icon>stop</mat-icon>
+        <button mat-button
+                color="warn"
+                *ngIf="cls.lectureStatus === 'IN_PROGRESS'"
+                (click)="endLecture(cls.id)">
           End Lecture
+        </button>
+        <button mat-button
+                disabled
+                *ngIf="cls.lectureStatus === 'COMPLETED'">
+          Lecture Completed
         </button>
       </mat-card-actions>
     </mat-card>

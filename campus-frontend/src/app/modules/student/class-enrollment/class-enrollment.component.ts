@@ -1,12 +1,28 @@
-import { Component, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ClassService } from '../../../services/class.service';
+import { AuthService } from '../../../services/auth.service';
 import { forkJoin } from 'rxjs';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { QrCodeDialogComponent, QrCodeDialogData } from './qr-code-dialog.component';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Subscription, timer } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import * as QRCode from 'qrcode';
+
+
+declare module 'qrcode' {
+  export function toDataURL(
+    text: string,
+    options: any,
+    callback: (err: Error | null, url: string | undefined) => void
+  ): void;
+}
 
 export interface IClass {
   id: string;
@@ -20,6 +36,7 @@ export interface IClass {
   room?: {
     id: string;
     name: string;
+    capacity?: number;
   };
   timeslotId: string;
   timeslot?: {
@@ -47,14 +64,25 @@ export interface IClass {
   location?: string;
   instructor?: string;
   status?: string;
+  isActive?: boolean;
+  currentQrCode?: string | null;
+  qrCodeExpiresAt?: string | null;
+  __enrollments__?: Array<{
+    id: string;
+    studentId: string;
+    classId: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
   createdAt: string;
   updatedAt: string;
+  lectureStatus?: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 }
 
 @Component({
   selector: 'app-class-enrollment',
   templateUrl: './class-enrollment.component.html',
-  styleUrls: ['./class-enrollment.component.scss'],
+  styleUrls: ['./class-enrollment.component.scss', './class-enrollment.styles.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -62,11 +90,14 @@ export interface IClass {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    DatePipe
+    DatePipe,
+    MatDialogModule,
+    MatSnackBarModule,
+    HttpClientModule
   ],
   providers: [DatePipe]
 })
-export class ClassEnrollmentComponent implements OnInit {
+export class ClassEnrollmentComponent implements OnInit, OnDestroy {
   classes: IClass[] = [];
   enrolledClasses: IClass[] = [];
   isLoading = false;
@@ -74,15 +105,51 @@ export class ClassEnrollmentComponent implements OnInit {
   errorMessage = '';
   today = new Date().toISOString().split('T')[0];
   attendanceStatus: { [key: string]: boolean } = {};
+  private apiUrl = 'http://localhost:3000';
+  private classesUrl = 'http://localhost:3000/classes';
+  private subscriptions = new Subscription();
 
   constructor(
     private classService: ClassService,
     private snackBar: MatSnackBar,
-    private datePipe: DatePipe
+    private authService: AuthService,
+    private dialog: MatDialog,
+    private datePipe: DatePipe,
+    private http: HttpClient
   ) {}
+
+  // Helper method to check if QR code is expired
+  isQrCodeExpired(expiryDate: string | null | undefined): boolean {
+    if (!expiryDate) return true;
+    return new Date() > new Date(expiryDate);
+  }
+
+  // Format the expiry date for display
+  formatExpiryDate(expiryDate: string | null | undefined): string {
+    if (!expiryDate) return 'Attendance closed';
+    
+    const date = new Date(expiryDate);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    
+    return `Attendance open until ${this.datePipe.transform(date, 'shortTime')}`;
+  }
+
+  getTimeRemainingPercentage(expiresAt: string | null): number {
+    if (!expiresAt) return 0;
+    const now = new Date().getTime();
+    const end = new Date(expiresAt).getTime();
+    const start = end - (15 * 60 * 1000); // 15 minutes before end
+    const total = end - start;
+    const elapsed = now - start;
+    return Math.min(100, Math.max(0, (elapsed / total) * 100));
+  }
 
   ngOnInit(): void {
     this.loadData();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
   loadData(): void {
@@ -108,11 +175,15 @@ export class ClassEnrollmentComponent implements OnInit {
           return {
             ...this.ensureCompleteClassData(cls),
             isEnrolled,
+            // Add isActive status from the API
+            isActive: cls.isActive,
+            currentQrCode: cls.currentQrCode,
+            qrCodeExpiresAt: cls.qrCodeExpiresAt
           };
         });
   
         console.log('Final enrolled classes:', this.enrolledClasses);
-        console.log('Final classes:', this.classes);
+        console.log('Final classes with attendance data:', this.classes);
   
         this.isLoading = false;
       },
@@ -218,32 +289,14 @@ export class ClassEnrollmentComponent implements OnInit {
     }
   }
 
-
-
-  markAttendance(classId: string): void {
-    if (!classId) {
-      console.error('No class ID provided for attendance');
-      return;
-    }
-
-    this.isLoading = true;
-    this.classService.markAttendance(classId).subscribe({
-      next: () => {
-        this.snackBar.open('Attendance marked successfully!', 'Close', {
-          duration: 3000,
-          panelClass: ['success-snackbar']
-        });
-        this.attendanceStatus[classId] = true;
-        this.isLoading = false;
-      },
-      error: (error: any) => {
-        console.error('Error marking attendance:', error);
-        this.snackBar.open('Failed to mark attendance. Please try again.', 'Close', {
-          duration: 3000,
-          panelClass: ['error-snackbar']
-        });
-        this.isLoading = false;
-      }
+  openQrDialog(classId: string, qrCode: string) {
+    this.dialog.open(QrCodeDialogComponent, {
+      width: '350px',
+      data: {
+        classId,
+        qrCode
+      } as QrCodeDialogData,
+      disableClose: true
     });
   }
 

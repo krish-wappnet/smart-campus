@@ -1,0 +1,100 @@
+<div class="attendance-container">
+  <mat-card class="attendance-card">
+    <mat-card-title>Attendance Analytics & History</mat-card-title>
+    <mat-card-content>
+      <div class="filters">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Select Month</mat-label>
+          <mat-select [(value)]="selectedMonth">
+            <mat-option value="">All</mat-option>
+            <mat-option *ngFor="let month of months" [value]="month">
+              {{ month }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Select Year</mat-label>
+          <mat-select [(value)]="selectedYear">
+            <mat-option value="">All</mat-option>
+            <mat-option *ngFor="let year of years" [value]="year">{{ year }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="attendance-stats">
+        <div class="stat-item">
+          <div class="stat-icon-wrapper">
+            <mat-icon>assignment</mat-icon>
+          </div>
+          <span class="stat-value">{{ totalClasses }}</span>
+          <span class="stat-label">Total Classes</span>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon-wrapper">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <span class="stat-value">{{ presentClasses }}</span>
+          <span class="stat-label">Present</span>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon-wrapper">
+            <mat-icon>remove_circle</mat-icon>
+          </div>
+          <span class="stat-value">{{ absentClasses }}</span>
+          <span class="stat-label">Absent</span>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon-wrapper">
+            <mat-icon>schedule</mat-icon>
+          </div>
+          <span class="stat-value">{{ lateClasses }}</span>
+          <span class="stat-label">Late</span>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon-wrapper">
+            <mat-icon>percent</mat-icon>
+          </div>
+          <span class="stat-value">{{ attendancePercentage }}%</span>
+          <span class="stat-label">Attendance</span>
+        </div>
+      </div>
+      <mat-card class="attendance-table">
+        <mat-card-content>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Class</th>
+                <th>Status</th>
+                <th>Faculty</th>
+                <th>Room</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let record of filteredHistory">
+                <td>{{ record.date | date:'mediumDate' }}</td>
+                <td>{{ record.class?.name || '-' }}</td>
+                <td>
+                  <span [ngClass]="{
+                    'present': record.status === 'present' || record.status === 'PRESENT',
+                    'absent': record.status === 'absent' || record.status === 'ABSENT',
+                    'late': record.status === 'late' || record.status === 'LATE'
+                  }" class="status-badge">
+                    <mat-icon *ngIf="record.status === 'present' || record.status === 'PRESENT'">check_circle</mat-icon>
+                    <mat-icon *ngIf="record.status === 'absent' || record.status === 'ABSENT'">remove_circle</mat-icon>
+                    <mat-icon *ngIf="record.status === 'late' || record.status === 'LATE'">schedule</mat-icon>
+                    {{ record.status | titlecase }}
+                  </span>
+                </td>
+                <td>{{ record.class?.facultyId || '-' }}</td>
+                <td>{{ record.class?.roomId || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="filteredHistory.length === 0" class="no-data-message">
+            No attendance records found for the selected filter.
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-card-content>
+  </mat-card>
+</div> 

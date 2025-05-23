@@ -1,0 +1,59 @@
+// ... (previous imports remain the same)
+
+  @Post('mark')
+  @Roles(Role.STUDENT)
+  @ApiOperation({ summary: 'Mark attendance using QR code' })
+  @ApiResponse({ 
+    status: HttpStatus.CREATED, 
+    description: 'Attendance marked successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        status: { type: 'string', enum: ['PRESENT', 'LATE'] },
+        class: { 
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            facultyName: { type: 'string' }
+          }
+        },
+        timestamp: { type: 'string', format: 'date-time' },
+        alreadyMarked: { type: ['boolean'], required: ['false'] }
+      }
+    }
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid QR code or already marked' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden - Requires student role' })
+  async markAttendance(
+    @Request() req,
+    @Body() markAttendanceDto: MarkAttendanceDto,
+  ) {
+    // ... existing implementation ...
+  }
+
+  @Post('mark/url')
+  @Roles(Role.STUDENT)
+  @ApiOperation({ summary: 'Mark attendance using QR code token from URL' })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Attendance marked successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        status: { type: 'string', enum: ['PRESENT', 'LATE'] },
+        class: { 
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            facultyName: { type: 'string' }
+          }
+        },
+        timestamp: { type: 'string', format: 'date-time' },
+        alreadyMarked: { type: ['boolean'], required: ['false'] }
+      }
+    }
+  })
+  // ... rest of the file remains the same ...
