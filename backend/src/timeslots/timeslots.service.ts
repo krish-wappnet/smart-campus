@@ -24,7 +24,7 @@ export class TimeslotsService {
     return this.timeslotsRepository.find();
   }
 
-  async findOne(id: string): Promise<Timeslot> {
+  async findOne(id: string): Promise<Timeslot | undefined> {
     return this.timeslotsRepository.findOne({ where: { id } });
   }
 }

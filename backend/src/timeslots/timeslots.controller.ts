@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Param } from '@nestjs/common';
 import { TimeslotsService } from './timeslots.service';
 import { CreateTimeslotDto } from './dto/create-timeslot.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -34,5 +34,16 @@ export class TimeslotsController {
   @ApiResponse({ status: 403, description: 'Forbidden - Requires admin or faculty role' })
   findAll(): Promise<Timeslot[]> {
     return this.timeslotsService.findAll();
+  }
+
+  @Get(':id')
+  @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
+  @ApiOperation({ summary: 'Get a timeslot by ID' })
+  @ApiResponse({ status: 200, description: 'Return a single timeslot', type: Timeslot })
+  @ApiResponse({ status: 404, description: 'Timeslot not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Requires admin, faculty, or student role' })
+  findOne(@Param('id') id: string): Promise<Timeslot> {
+    return this.timeslotsService.findOne(id);
   }
 }

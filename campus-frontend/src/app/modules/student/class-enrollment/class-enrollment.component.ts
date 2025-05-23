@@ -10,7 +10,7 @@ import { AuthService } from '../../../services/auth.service';
 import { forkJoin } from 'rxjs';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { QrCodeDialogComponent, QrCodeDialogData } from './qr-code-dialog.component';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { Subscription, timer } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import * as QRCode from 'qrcode';
@@ -77,6 +77,7 @@ export interface IClass {
   createdAt: string;
   updatedAt: string;
   lectureStatus?: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+  isEnrolled?: boolean;
 }
 
 @Component({
@@ -100,9 +101,13 @@ export interface IClass {
 export class ClassEnrollmentComponent implements OnInit, OnDestroy {
   classes: IClass[] = [];
   enrolledClasses: IClass[] = [];
+  availableClasses: IClass[] = [];
+  currentEnrolledClasses: IClass[] = [];
+  completedLectures: IClass[] = [];
   isLoading = false;
   hasError = false;
   errorMessage = '';
+  staticTimeslot: any = null;
   today = new Date().toISOString().split('T')[0];
   attendanceStatus: { [key: string]: boolean } = {};
   private apiUrl = 'http://localhost:3000';
@@ -156,34 +161,48 @@ export class ClassEnrollmentComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.hasError = false;
   
-    forkJoin([
-      this.classService.getStudentClasses(),
-      this.classService.getAllClasses(),
-    ]).subscribe({
-      next: ([enrolledClasses, allClasses]: [IClass[], IClass[]]) => {
-        console.log('Enrolled classes:', enrolledClasses);
-        console.log('All classes:', allClasses);
+    forkJoin({
+      enrolled: this.classService.getStudentClasses(),
+      all: this.classService.getAllClasses(),
+      staticTimeslot: this.http.get<any>(`${this.apiUrl}/timeslots/d4d4fd85-ee27-49cd-a4c8-9f3b3c17d781`, {
+        headers: new HttpHeaders({
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json'
+        })
+      })
+    }).subscribe({
+      next: (results: { enrolled: IClass[], all: IClass[], staticTimeslot: any }) => {
+        console.log('Enrolled classes:', results.enrolled);
+        console.log('All classes:', results.all);
+        console.log('Static Timeslot:', results.staticTimeslot);
+        this.staticTimeslot = results.staticTimeslot;
   
-        // Process enrolled classes
-        this.enrolledClasses = enrolledClasses.map((cls) =>
+        this.enrolledClasses = results.enrolled.map((cls) =>
           this.ensureCompleteClassData(cls)
         );
   
-        // Process all classes and mark enrolled ones
-        this.classes = allClasses.map((cls) => {
+        this.classes = results.all.map((cls) => {
           const isEnrolled = this.enrolledClasses.some((ec) => ec.id === cls.id);
           return {
             ...this.ensureCompleteClassData(cls),
             isEnrolled,
-            // Add isActive status from the API
             isActive: cls.isActive,
             currentQrCode: cls.currentQrCode,
-            qrCodeExpiresAt: cls.qrCodeExpiresAt
+            qrCodeExpiresAt: cls.qrCodeExpiresAt,
+            lectureStatus: cls.lectureStatus
           };
         });
   
         console.log('Final enrolled classes:', this.enrolledClasses);
         console.log('Final classes with attendance data:', this.classes);
+  
+        this.availableClasses = this.classes.filter(cls => !cls.isEnrolled);
+        this.currentEnrolledClasses = this.enrolledClasses.filter(cls => cls.lectureStatus !== 'COMPLETED');
+        this.completedLectures = this.enrolledClasses.filter(cls => cls.lectureStatus === 'COMPLETED');
+  
+        console.log('Available Classes:', this.availableClasses);
+        console.log('Current Enrolled Classes:', this.currentEnrolledClasses);
+        console.log('Completed Lectures:', this.completedLectures);
   
         this.isLoading = false;
       },
@@ -200,14 +219,11 @@ export class ClassEnrollmentComponent implements OnInit, OnDestroy {
     });
   }
   
-  // Helper method to ensure class data has the complete structure
   private ensureCompleteClassData(cls: IClass): IClass {
     const processedClass: IClass = { ...cls };
   
-    // Log the class data for debugging
     console.log('Processing class:', processedClass);
   
-    // Handle faculty data
     if (!processedClass.faculty && processedClass.facultyId) {
       processedClass.faculty = {
         id: processedClass.facultyId,
@@ -215,7 +231,6 @@ export class ClassEnrollmentComponent implements OnInit, OnDestroy {
       };
     }
   
-    // Handle room data
     if (!processedClass.room && processedClass.roomId) {
       processedClass.room = {
         id: processedClass.roomId,
@@ -223,17 +238,17 @@ export class ClassEnrollmentComponent implements OnInit, OnDestroy {
       };
     }
   
-    // Handle timeslot data
-    if (!processedClass.timeslot && processedClass.timeslotId) {
-      processedClass.timeslot = {
-        id: processedClass.timeslotId,
-        startTime: processedClass.startTime || '09:00',
-        endTime: processedClass.endTime || '10:00',
-        dayOfWeek: processedClass.dayOfWeek || 'Monday',
-      };
+    if (this.staticTimeslot) {
+      processedClass.timeslot = { ...this.staticTimeslot };
+    } else if (!processedClass.timeslot && processedClass.timeslotId) {
+       processedClass.timeslot = {
+         id: processedClass.timeslotId,
+         startTime: processedClass.startTime || '09:00',
+         endTime: processedClass.endTime || '10:00',
+         dayOfWeek: processedClass.dayOfWeek || 'Monday',
+       };
     }
   
-    // Fallback for missing fields
     processedClass.name = processedClass.name || 'Unnamed Class';
     processedClass.faculty = processedClass.faculty || {
       id: processedClass.facultyId || 'N/A',
@@ -243,14 +258,13 @@ export class ClassEnrollmentComponent implements OnInit, OnDestroy {
       id: processedClass.roomId || 'N/A',
       name: 'Room Not Assigned',
     };
-    processedClass.timeslot = processedClass.timeslot || {
+     processedClass.timeslot = processedClass.timeslot || {
       id: processedClass.timeslotId || 'N/A',
       startTime: '09:00',
       endTime: '10:00',
       dayOfWeek: 'Monday',
     };
   
-    // Log the processed class data
     console.log('Processed class:', processedClass);
   
     return processedClass;
@@ -310,7 +324,7 @@ export class ClassEnrollmentComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     const request$ = isEnrolled 
-      ? this.classService.unenrollFromClass(classId)
+      ? this.classService.unenrollFromClass(classId) 
       : this.classService.enrollInClass(classId);
 
     request$.subscribe({
@@ -319,7 +333,7 @@ export class ClassEnrollmentComponent implements OnInit, OnDestroy {
           ? 'Successfully unenrolled from class' 
           : 'Successfully enrolled in class';
         
-        this.snackBar.open(message, 'Close', { 
+        this.snackBar.open(message, 'Close', {
           duration: 3000,
           panelClass: ['success-snackbar']
         });
@@ -330,9 +344,9 @@ export class ClassEnrollmentComponent implements OnInit, OnDestroy {
       error: (error: any) => {
         console.error(`Error ${isEnrolled ? 'un' : ''}enrolling:`, error);
         this.snackBar.open(
-          `Failed to ${isEnrolled ? 'unenroll from' : 'enroll in'} class. Please try again.`, 
-          'Close', 
-          { 
+          `Failed to ${isEnrolled ? 'unenroll from' : 'enroll in'} class. Please try again.`,
+          'Close',
+          {
             duration: 3000,
             panelClass: ['error-snackbar']
           }

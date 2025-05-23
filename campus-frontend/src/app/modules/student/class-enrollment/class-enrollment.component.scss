@@ -73,6 +73,7 @@
   border: 1px solid #e9ecef;
   min-height: 200px;
   text-align: center;
+  margin-bottom: 24px;
 
   &.loading-spinner {
     mat-spinner {
@@ -111,7 +112,8 @@
     }
   }
 
-  &.no-classes {
+  &.no-classes,
+  &.no-classes-section {
     mat-icon {
       font-size: 32px;
       width: 32px;
@@ -128,7 +130,27 @@
   }
 }
 
-// Class Grid
+// Styles for the three class sections
+.classes-section {
+  margin-bottom: 32px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 16px 0;
+  }
+
+  .no-classes-section {
+    margin-bottom: 0;
+  }
+}
+
+// Classes Grid
 .class-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -146,98 +168,38 @@
   border: 1px solid #e9ecef;
   background: #fff;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  min-height: 300px;
+  min-height: 250px;
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   }
 
-  .class-header {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  mat-card-header {
     padding: 16px;
 
-    .class-title-row {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      .class-name {
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-        margin: 0;
-      }
-
-      .faculty-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        .faculty-icon {
-          font-size: 16px;
-          width: 16px;
-          height: 16px;
-          color: #666;
-        }
-
-        .faculty-name {
-          font-size: 14px;
-          color: #666;
-        }
-      }
+    mat-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 4px 0;
     }
 
-    .status-badges {
-      display: flex;
-      gap: 8px;
-
-      .enrolled-badge,
-      .active-badge {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 500;
-      }
-
-      .enrolled-badge {
-        background: #e8f5e9;
-        color: #4caf50;
-
-        mat-icon {
-          font-size: 14px;
-          width: 14px;
-          height: 14px;
-          color: #4caf50;
-        }
-      }
-
-      .active-badge {
-        background: #e3f2fd;
-        color: #2196f3;
-
-        mat-icon {
-          font-size: 14px;
-          width: 14px;
-          height: 14px;
-          color: #2196f3;
-        }
-      }
+    mat-card-subtitle {
+      font-size: 14px;
+      color: #666;
     }
   }
 
   mat-card-content {
-    padding: 0 16px 16px 16px;
+    padding: 0 16px 16px;
+    flex-grow: 1;
 
     .class-details {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      margin-bottom: 16px;
 
       .detail {
         display: flex;
@@ -248,7 +210,7 @@
           font-size: 16px;
           width: 16px;
           height: 16px;
-          color: #888;
+          color: #666;
         }
 
         span {
@@ -260,87 +222,13 @@
 
     .class-description {
       font-size: 14px;
-      color: #666;
-      margin-top: 16px;
-      line-height: 1.5;
-    }
-  }
-
-  .card-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px;
-    gap: 12px;
-    border-top: 1px solid #f0f0f0;
-
-    .action-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      width: 100%;
-
-      .enroll-button,
-      .attendance-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-        flex: 1;
-        max-width: 150px;
-        transition: all 0.2s ease;
-
-        &:hover:not(:disabled) {
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        &:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .button-icon {
-          font-size: 16px;
-          width: 16px;
-          height: 16px;
-        }
-
-        .button-text {
-          font-size: 14px;
-        }
-      }
-
-      .attendance-button {
-        &.attendance-marked {
-          background: #4caf50;
-          color: white;
-        }
-
-        &.attendance-pending {
-          background: #2196f3;
-          color: white;
-        }
-
-        .button-spinner {
-          position: absolute;
-          right: 6px;
-
-          ::ng-deep circle {
-            stroke: currentColor;
-          }
-        }
-      }
+      color: #555;
+      margin: 0 0 16px 0;
     }
 
     .attendance-section {
-      width: 100%;
       margin-top: 12px;
-      padding: 12px;
+      padding: 8px 12px;
       background: #f8f9fa;
       border-radius: 6px;
       border: 1px solid #e9ecef;
@@ -349,7 +237,6 @@
       .attendance-row {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: 12px;
         width: 100%;
       }
@@ -357,7 +244,6 @@
       .status-indicator {
         display: flex;
         align-items: center;
-        gap: 8px;
 
         .status-icon {
           font-size: 18px;
@@ -369,12 +255,13 @@
             color: #4caf50;
           }
         }
+      }
 
-        .status-text {
-          font-size: 12px;
-          font-weight: 500;
-          color: #495057;
-        }
+      .status-text {
+        font-size: 12px;
+        font-weight: 500;
+        color: #495057;
+        min-width: 60px;
       }
 
       .qr-expiry {
@@ -383,7 +270,7 @@
         gap: 4px;
         font-size: 11px;
         color: #6c757d;
-        padding: 4px 8px;
+        padding: 2px 8px;
         border-radius: 4px;
         background: #fff;
         border: 1px solid #e9ecef;
@@ -404,10 +291,85 @@
           height: 14px;
           color: #4caf50;
         }
+      }
+    }
 
-        .expiry-text {
-          font-size: 11px;
+    .action-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      height: 32px;
+      min-width: 90px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      &.attendance-marked {
+        background: #4caf50;
+        color: white;
+      }
+
+      &.attendance-pending {
+        background: #2196f3;
+        color: white;
+      }
+
+      .button-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        margin-right: 4px;
+      }
+
+      .button-spinner {
+        position: absolute;
+        right: 6px;
+
+        ::ng-deep circle {
+          stroke: currentColor;
         }
+      }
+    }
+  }
+
+  mat-card-actions {
+    padding: 8px 16px 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      mat-icon {
+        margin-right: 4px;
       }
     }
   }
@@ -420,24 +382,22 @@
   }
 
   .header-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
     .header-content {
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       gap: 12px;
+    }
 
-      h2 {
-        font-size: 20px;
-      }
+    .header-actions {
+      width: 100%;
 
-      .header-actions {
+      .refresh-btn {
         width: 100%;
-        display: flex;
         justify-content: center;
-
-        .refresh-btn {
-          width: 100%;
-          max-width: 200px;
-        }
       }
     }
   }
@@ -448,51 +408,91 @@
   }
 
   .class-card {
-    min-height: 280px;
+    mat-card-header {
+      padding: 12px;
+    }
 
-    .card-actions {
-      .action-buttons {
-        flex-direction: column;
+    mat-card-content {
+      padding: 0 12px 12px;
+
+      .class-details {
         gap: 8px;
-
-        .enroll-button,
-        .attendance-button {
-          max-width: none;
-        }
       }
 
       .attendance-section {
-        padding: 8px;
+        padding: 6px 10px;
 
         .attendance-row {
           flex-direction: column;
           align-items: flex-start;
           gap: 8px;
         }
+
+        .qr-expiry {
+          padding: 4px 6px;
+          font-size: 10px;
+        }
       }
     }
-  }
 
-  .message-container {
-    padding: 24px;
-    min-height: 150px;
+    mat-card-actions {
+      padding: 6px 12px 12px;
+      flex-direction: column;
+      gap: 8px;
+      align-items: stretch;
 
-    &.error-message {
-      p {
-        font-size: 14px;
+      .action-buttons {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
       }
 
       button {
-        font-size: 12px;
-        padding: 6px 12px;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .classes-section {
+    margin-bottom: 24px;
+  }
+
+  .class-grid {
+    gap: 12px;
+  }
+
+  .class-card {
+    mat-card-header {
+      padding: 10px;
+    }
+
+    mat-card-content {
+      padding: 0 10px 10px;
+
+      .class-details {
+        gap: 6px;
+      }
+
+      .attendance-section {
+        padding: 4px 8px;
+        gap: 10px;
+
+        .attendance-row {
+          gap: 6px;
+        }
       }
     }
 
-    &.no-classes,
-    &.loading-spinner {
-      p {
-        font-size: 14px;
-      }
+    mat-card-actions {
+      padding: 4px 10px 10px;
+      gap: 6px;
     }
   }
 }
