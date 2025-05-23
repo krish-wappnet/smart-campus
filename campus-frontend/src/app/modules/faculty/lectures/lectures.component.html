@@ -55,6 +55,12 @@
                 *ngIf="cls.lectureStatus === 'COMPLETED'">
           Lecture Completed
         </button>
+        <button mat-button
+                color="accent"
+                *ngIf="cls.lectureStatus === 'COMPLETED'"
+                (click)="viewAttendanceReport(cls.id)">
+          View Attendance
+        </button>
       </mat-card-actions>
     </mat-card>
   </div>

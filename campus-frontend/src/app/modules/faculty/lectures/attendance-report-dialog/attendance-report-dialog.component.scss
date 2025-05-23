@@ -1,0 +1,31 @@
+.attendance-table-container {
+  max-height: 400px; /* Set a max height for scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.mat-table {
+  width: 100%;
+}
+
+.mat-column-studentName {
+  flex: 1 1 50%; /* Allocate more space to the name */
+}
+
+.mat-column-date {
+  flex: 0 0 120px; /* Fixed width for date */
+}
+
+.mat-column-status {
+  flex: 0 0 100px; /* Fixed width for status */
+}
+
+/* Optional: Add some padding or styling to cells */
+td.mat-cell,
+th.mat-header-cell {
+  padding: 8px;
+}
+
+/* Style for status text */
+.mat-cell span {
+  font-weight: 500;
+} 

@@ -14,6 +14,7 @@ import { Subscription, timer, of, forkJoin } from 'rxjs';
 import { catchError, switchMap, map } from 'rxjs/operators';
 
 import { QrCodeDialogComponent } from './qr-code-dialog/qr-code-dialog.component';
+import { AttendanceReportDialogComponent } from './attendance-report-dialog/attendance-report-dialog.component';
 
 interface FacultyClass {
   id: string;
@@ -248,5 +249,31 @@ export class LecturesComponent implements OnInit, OnDestroy {
     const total = end - start;
     const elapsed = now - start;
     return Math.min(100, Math.max(0, (elapsed / total) * 100));
+  }
+
+  viewAttendanceReport(classId: string): void {
+    console.log(`Fetching attendance report for class ID: ${classId}`);
+    const url = `${this.apiUrl}/attendance/class/${classId}`;
+
+    this.http.get<any>(url, { headers: this.getAuthHeaders() }).subscribe({
+      next: (report) => {
+        console.log('Attendance Report:', report);
+        this.dialog.open(AttendanceReportDialogComponent, {
+          width: '600px',
+          data: { attendanceData: report, classId: classId }
+        });
+      },
+      error: (error) => {
+        console.error('Error fetching attendance report:', error);
+        this.snackBar.open(
+          error.error?.message || 'Failed to fetch attendance report. Please try again.',
+          'Dismiss',
+          {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          }
+        );
+      }
+    });
   }
 }
